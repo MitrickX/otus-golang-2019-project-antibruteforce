@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package grpc;
+
+// protoc --go_out=plugins=grpc:./../internal/grpc api.proto
+
+message Response {
+    bool ok = 1;
+}
+
+message AuthRequest {
+    string login = 1;
+    string password = 2;
+    string ip = 3;
+}
+
+message ClearBucketRequest {
+    string login = 1;
+    string ip = 2;
+}
+
+message IpListRequest {
+    string ip = 1;
+}
+
+service Api {
+    rpc ClearBucket(ClearBucketRequest)        returns (Response) {};
+    rpc Auth(AuthRequest)                      returns (Response) {};
+    rpc AddIpInBlackList(IpListRequest)        returns (Response) {};
+    rpc DeleteIpFromBlackList(IpListRequest)   returns (Response) {};
+    rpc AddIpInWhiteList(IpListRequest)        returns (Response) {};
+    rpc DeleteIpFromWhiteList(IpListRequest)   returns (Response) {};
+}
