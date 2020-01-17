@@ -118,7 +118,7 @@ func (m *AuthRequest) GetIp() string {
 	return ""
 }
 
-type ClearBucketRequest struct {
+type DeleteBucketRequest struct {
 	Login                string   `protobuf:"bytes,1,opt,name=login,proto3" json:"login,omitempty"`
 	Ip                   string   `protobuf:"bytes,2,opt,name=ip,proto3" json:"ip,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -126,78 +126,78 @@ type ClearBucketRequest struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *ClearBucketRequest) Reset()         { *m = ClearBucketRequest{} }
-func (m *ClearBucketRequest) String() string { return proto.CompactTextString(m) }
-func (*ClearBucketRequest) ProtoMessage()    {}
-func (*ClearBucketRequest) Descriptor() ([]byte, []int) {
+func (m *DeleteBucketRequest) Reset()         { *m = DeleteBucketRequest{} }
+func (m *DeleteBucketRequest) String() string { return proto.CompactTextString(m) }
+func (*DeleteBucketRequest) ProtoMessage()    {}
+func (*DeleteBucketRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_00212fb1f9d3bf1c, []int{2}
 }
 
-func (m *ClearBucketRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ClearBucketRequest.Unmarshal(m, b)
+func (m *DeleteBucketRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteBucketRequest.Unmarshal(m, b)
 }
-func (m *ClearBucketRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ClearBucketRequest.Marshal(b, m, deterministic)
+func (m *DeleteBucketRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteBucketRequest.Marshal(b, m, deterministic)
 }
-func (m *ClearBucketRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClearBucketRequest.Merge(m, src)
+func (m *DeleteBucketRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteBucketRequest.Merge(m, src)
 }
-func (m *ClearBucketRequest) XXX_Size() int {
-	return xxx_messageInfo_ClearBucketRequest.Size(m)
+func (m *DeleteBucketRequest) XXX_Size() int {
+	return xxx_messageInfo_DeleteBucketRequest.Size(m)
 }
-func (m *ClearBucketRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_ClearBucketRequest.DiscardUnknown(m)
+func (m *DeleteBucketRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteBucketRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ClearBucketRequest proto.InternalMessageInfo
+var xxx_messageInfo_DeleteBucketRequest proto.InternalMessageInfo
 
-func (m *ClearBucketRequest) GetLogin() string {
+func (m *DeleteBucketRequest) GetLogin() string {
 	if m != nil {
 		return m.Login
 	}
 	return ""
 }
 
-func (m *ClearBucketRequest) GetIp() string {
+func (m *DeleteBucketRequest) GetIp() string {
 	if m != nil {
 		return m.Ip
 	}
 	return ""
 }
 
-type IpListRequest struct {
+type IpRequest struct {
 	Ip                   string   `protobuf:"bytes,1,opt,name=ip,proto3" json:"ip,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *IpListRequest) Reset()         { *m = IpListRequest{} }
-func (m *IpListRequest) String() string { return proto.CompactTextString(m) }
-func (*IpListRequest) ProtoMessage()    {}
-func (*IpListRequest) Descriptor() ([]byte, []int) {
+func (m *IpRequest) Reset()         { *m = IpRequest{} }
+func (m *IpRequest) String() string { return proto.CompactTextString(m) }
+func (*IpRequest) ProtoMessage()    {}
+func (*IpRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_00212fb1f9d3bf1c, []int{3}
 }
 
-func (m *IpListRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_IpListRequest.Unmarshal(m, b)
+func (m *IpRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_IpRequest.Unmarshal(m, b)
 }
-func (m *IpListRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_IpListRequest.Marshal(b, m, deterministic)
+func (m *IpRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_IpRequest.Marshal(b, m, deterministic)
 }
-func (m *IpListRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_IpListRequest.Merge(m, src)
+func (m *IpRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IpRequest.Merge(m, src)
 }
-func (m *IpListRequest) XXX_Size() int {
-	return xxx_messageInfo_IpListRequest.Size(m)
+func (m *IpRequest) XXX_Size() int {
+	return xxx_messageInfo_IpRequest.Size(m)
 }
-func (m *IpListRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_IpListRequest.DiscardUnknown(m)
+func (m *IpRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_IpRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_IpListRequest proto.InternalMessageInfo
+var xxx_messageInfo_IpRequest proto.InternalMessageInfo
 
-func (m *IpListRequest) GetIp() string {
+func (m *IpRequest) GetIp() string {
 	if m != nil {
 		return m.Ip
 	}
@@ -207,31 +207,31 @@ func (m *IpListRequest) GetIp() string {
 func init() {
 	proto.RegisterType((*Response)(nil), "grpc.Response")
 	proto.RegisterType((*AuthRequest)(nil), "grpc.AuthRequest")
-	proto.RegisterType((*ClearBucketRequest)(nil), "grpc.ClearBucketRequest")
-	proto.RegisterType((*IpListRequest)(nil), "grpc.IpListRequest")
+	proto.RegisterType((*DeleteBucketRequest)(nil), "grpc.DeleteBucketRequest")
+	proto.RegisterType((*IpRequest)(nil), "grpc.IpRequest")
 }
 
 func init() { proto.RegisterFile("api.proto", fileDescriptor_00212fb1f9d3bf1c) }
 
 var fileDescriptor_00212fb1f9d3bf1c = []byte{
-	// 268 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x92, 0x41, 0x4b, 0xc3, 0x40,
-	0x10, 0x85, 0xcd, 0xb6, 0x4a, 0x3a, 0xc5, 0xa2, 0xa3, 0x42, 0xc8, 0x45, 0xc9, 0x49, 0x10, 0x72,
-	0xd0, 0x53, 0x3d, 0x08, 0xa9, 0x22, 0x04, 0x04, 0x21, 0x17, 0xcf, 0x31, 0x19, 0xda, 0x25, 0x31,
-	0x3b, 0xee, 0x6e, 0xf0, 0x07, 0xfb, 0x47, 0x24, 0x59, 0x1a, 0x2b, 0x16, 0xa1, 0x78, 0x9c, 0x7d,
-	0xef, 0x9b, 0x37, 0x0f, 0x16, 0x26, 0x39, 0xcb, 0x98, 0xb5, 0xb2, 0x0a, 0xc7, 0x4b, 0xcd, 0x45,
-	0x14, 0x82, 0x9f, 0x91, 0x61, 0xd5, 0x18, 0xc2, 0x19, 0x08, 0x55, 0x05, 0xde, 0x85, 0x77, 0xe9,
-	0x67, 0x42, 0x55, 0xd1, 0x33, 0x4c, 0x93, 0xd6, 0xae, 0x32, 0x7a, 0x6f, 0xc9, 0x58, 0x3c, 0x85,
-	0xfd, 0x5a, 0x2d, 0x65, 0xd3, 0x3b, 0x26, 0x99, 0x1b, 0x30, 0x04, 0x9f, 0x73, 0x63, 0x3e, 0x94,
-	0x2e, 0x03, 0xd1, 0x0b, 0xc3, 0xdc, 0x2d, 0x94, 0x1c, 0x8c, 0xfa, 0x57, 0x21, 0x39, 0xba, 0x05,
-	0xbc, 0xaf, 0x29, 0xd7, 0x8b, 0xb6, 0xa8, 0xc8, 0xfe, 0xbd, 0xd7, 0xb1, 0x62, 0x60, 0xcf, 0xe1,
-	0x30, 0xe5, 0x27, 0x69, 0x06, 0xcc, 0x19, 0xbc, 0xb5, 0xe1, 0xfa, 0x53, 0xc0, 0x28, 0x61, 0x89,
-	0x73, 0x98, 0x6e, 0x84, 0x60, 0x10, 0x77, 0x3d, 0xe3, 0xdf, 0xb9, 0xe1, 0xcc, 0x29, 0xeb, 0xfa,
-	0xd1, 0x1e, 0x5e, 0xc1, 0xb8, 0x2b, 0x8c, 0xc7, 0x4e, 0xd9, 0x28, 0xbf, 0xc5, 0x3c, 0x87, 0xa3,
-	0xa4, 0x2c, 0x53, 0x4e, 0x9b, 0x45, 0x9d, 0x17, 0x55, 0x77, 0x1a, 0x9e, 0x38, 0xd7, 0x8f, 0x43,
-	0xb7, 0xa0, 0x77, 0x70, 0xf6, 0x40, 0x35, 0x59, 0x4a, 0xf9, 0x51, 0xab, 0xb7, 0x9d, 0xf9, 0xef,
-	0xe8, 0x97, 0x95, 0xb4, 0xf4, 0x8f, 0xe8, 0x5d, 0xf9, 0xd7, 0x83, 0xfe, 0xf3, 0xdc, 0x7c, 0x05,
-	0x00, 0x00, 0xff, 0xff, 0x40, 0x94, 0xc2, 0xc0, 0x49, 0x02, 0x00, 0x00,
+	// 265 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x92, 0x41, 0x4b, 0xfb, 0x40,
+	0x10, 0xc5, 0xff, 0xd9, 0xf6, 0x2f, 0xc9, 0x14, 0x22, 0x8e, 0x1e, 0x62, 0xbc, 0x48, 0x4e, 0x82,
+	0x90, 0x83, 0xbd, 0x88, 0x9e, 0x52, 0x45, 0x28, 0x08, 0x42, 0x2e, 0x9e, 0x63, 0x32, 0xb4, 0x4b,
+	0x62, 0x76, 0xdc, 0xdd, 0xe0, 0x97, 0xf4, 0x43, 0x49, 0xb2, 0x24, 0x28, 0x94, 0x62, 0x8f, 0xb3,
+	0xef, 0xfd, 0xe6, 0xed, 0x5b, 0x16, 0x82, 0x82, 0x65, 0xca, 0x5a, 0x59, 0x85, 0xf3, 0x8d, 0xe6,
+	0x32, 0x89, 0xc1, 0xcf, 0xc9, 0xb0, 0x6a, 0x0d, 0x61, 0x08, 0x42, 0xd5, 0x91, 0x77, 0xe9, 0x5d,
+	0xf9, 0xb9, 0x50, 0x75, 0xf2, 0x02, 0x8b, 0xac, 0xb3, 0xdb, 0x9c, 0x3e, 0x3a, 0x32, 0x16, 0xcf,
+	0xe0, 0x7f, 0xa3, 0x36, 0xb2, 0x1d, 0x1c, 0x41, 0xee, 0x06, 0x8c, 0xc1, 0xe7, 0xc2, 0x98, 0x4f,
+	0xa5, 0xab, 0x48, 0x0c, 0xc2, 0x34, 0xf7, 0x0b, 0x25, 0x47, 0xb3, 0xe1, 0x54, 0x48, 0x4e, 0xee,
+	0xe1, 0xf4, 0x91, 0x1a, 0xb2, 0xb4, 0xea, 0xca, 0x9a, 0xec, 0xfe, 0xc5, 0x0e, 0x16, 0x13, 0x7c,
+	0x01, 0xc1, 0x9a, 0x47, 0xc4, 0x89, 0xde, 0x28, 0xde, 0x7c, 0x09, 0x98, 0x65, 0x2c, 0xf1, 0x0e,
+	0x16, 0x0f, 0x0d, 0x15, 0xda, 0x05, 0xe0, 0x79, 0xda, 0x97, 0x4c, 0x77, 0x84, 0xc6, 0xa1, 0x93,
+	0xc6, 0xf2, 0xc9, 0x3f, 0xbc, 0x86, 0x79, 0x5f, 0x17, 0x4f, 0x9c, 0xf2, 0xa3, 0xfa, 0x0e, 0xf3,
+	0x12, 0xc2, 0xac, 0xaa, 0xd6, 0xed, 0xaa, 0x29, 0xca, 0xfa, 0x59, 0x1a, 0x8b, 0xc7, 0xce, 0x33,
+	0xdd, 0x71, 0x0f, 0xf4, 0xba, 0x95, 0x96, 0xfe, 0x0a, 0xdd, 0x8e, 0x8f, 0xf6, 0xa4, 0xd5, 0xfb,
+	0x41, 0x71, 0xbf, 0xc8, 0x43, 0x32, 0xdf, 0x8e, 0x86, 0x2f, 0xb2, 0xfc, 0x0e, 0x00, 0x00, 0xff,
+	0xff, 0x2f, 0xb5, 0x11, 0xaa, 0x2f, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -246,12 +246,12 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ApiClient interface {
-	ClearBucket(ctx context.Context, in *ClearBucketRequest, opts ...grpc.CallOption) (*Response, error)
+	ClearBucket(ctx context.Context, in *DeleteBucketRequest, opts ...grpc.CallOption) (*Response, error)
 	Auth(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*Response, error)
-	AddIpInBlackList(ctx context.Context, in *IpListRequest, opts ...grpc.CallOption) (*Response, error)
-	DeleteIpFromBlackList(ctx context.Context, in *IpListRequest, opts ...grpc.CallOption) (*Response, error)
-	AddIpInWhiteList(ctx context.Context, in *IpListRequest, opts ...grpc.CallOption) (*Response, error)
-	DeleteIpFromWhiteList(ctx context.Context, in *IpListRequest, opts ...grpc.CallOption) (*Response, error)
+	AddInBlackList(ctx context.Context, in *IpRequest, opts ...grpc.CallOption) (*Response, error)
+	AddInWhiteList(ctx context.Context, in *IpRequest, opts ...grpc.CallOption) (*Response, error)
+	DeleteFromBlackList(ctx context.Context, in *IpRequest, opts ...grpc.CallOption) (*Response, error)
+	DeleteFromWhiteList(ctx context.Context, in *IpRequest, opts ...grpc.CallOption) (*Response, error)
 }
 
 type apiClient struct {
@@ -262,7 +262,7 @@ func NewApiClient(cc *grpc.ClientConn) ApiClient {
 	return &apiClient{cc}
 }
 
-func (c *apiClient) ClearBucket(ctx context.Context, in *ClearBucketRequest, opts ...grpc.CallOption) (*Response, error) {
+func (c *apiClient) ClearBucket(ctx context.Context, in *DeleteBucketRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
 	err := c.cc.Invoke(ctx, "/grpc.Api/ClearBucket", in, out, opts...)
 	if err != nil {
@@ -280,36 +280,36 @@ func (c *apiClient) Auth(ctx context.Context, in *AuthRequest, opts ...grpc.Call
 	return out, nil
 }
 
-func (c *apiClient) AddIpInBlackList(ctx context.Context, in *IpListRequest, opts ...grpc.CallOption) (*Response, error) {
+func (c *apiClient) AddInBlackList(ctx context.Context, in *IpRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, "/grpc.Api/AddIpInBlackList", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Api/AddInBlackList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *apiClient) DeleteIpFromBlackList(ctx context.Context, in *IpListRequest, opts ...grpc.CallOption) (*Response, error) {
+func (c *apiClient) AddInWhiteList(ctx context.Context, in *IpRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, "/grpc.Api/DeleteIpFromBlackList", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Api/AddInWhiteList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *apiClient) AddIpInWhiteList(ctx context.Context, in *IpListRequest, opts ...grpc.CallOption) (*Response, error) {
+func (c *apiClient) DeleteFromBlackList(ctx context.Context, in *IpRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, "/grpc.Api/AddIpInWhiteList", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Api/DeleteFromBlackList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *apiClient) DeleteIpFromWhiteList(ctx context.Context, in *IpListRequest, opts ...grpc.CallOption) (*Response, error) {
+func (c *apiClient) DeleteFromWhiteList(ctx context.Context, in *IpRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, "/grpc.Api/DeleteIpFromWhiteList", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Api/DeleteFromWhiteList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -318,35 +318,35 @@ func (c *apiClient) DeleteIpFromWhiteList(ctx context.Context, in *IpListRequest
 
 // ApiServer is the server API for Api service.
 type ApiServer interface {
-	ClearBucket(context.Context, *ClearBucketRequest) (*Response, error)
+	ClearBucket(context.Context, *DeleteBucketRequest) (*Response, error)
 	Auth(context.Context, *AuthRequest) (*Response, error)
-	AddIpInBlackList(context.Context, *IpListRequest) (*Response, error)
-	DeleteIpFromBlackList(context.Context, *IpListRequest) (*Response, error)
-	AddIpInWhiteList(context.Context, *IpListRequest) (*Response, error)
-	DeleteIpFromWhiteList(context.Context, *IpListRequest) (*Response, error)
+	AddInBlackList(context.Context, *IpRequest) (*Response, error)
+	AddInWhiteList(context.Context, *IpRequest) (*Response, error)
+	DeleteFromBlackList(context.Context, *IpRequest) (*Response, error)
+	DeleteFromWhiteList(context.Context, *IpRequest) (*Response, error)
 }
 
 // UnimplementedApiServer can be embedded to have forward compatible implementations.
 type UnimplementedApiServer struct {
 }
 
-func (*UnimplementedApiServer) ClearBucket(ctx context.Context, req *ClearBucketRequest) (*Response, error) {
+func (*UnimplementedApiServer) ClearBucket(ctx context.Context, req *DeleteBucketRequest) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClearBucket not implemented")
 }
 func (*UnimplementedApiServer) Auth(ctx context.Context, req *AuthRequest) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Auth not implemented")
 }
-func (*UnimplementedApiServer) AddIpInBlackList(ctx context.Context, req *IpListRequest) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddIpInBlackList not implemented")
+func (*UnimplementedApiServer) AddInBlackList(ctx context.Context, req *IpRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddInBlackList not implemented")
 }
-func (*UnimplementedApiServer) DeleteIpFromBlackList(ctx context.Context, req *IpListRequest) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteIpFromBlackList not implemented")
+func (*UnimplementedApiServer) AddInWhiteList(ctx context.Context, req *IpRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddInWhiteList not implemented")
 }
-func (*UnimplementedApiServer) AddIpInWhiteList(ctx context.Context, req *IpListRequest) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddIpInWhiteList not implemented")
+func (*UnimplementedApiServer) DeleteFromBlackList(ctx context.Context, req *IpRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFromBlackList not implemented")
 }
-func (*UnimplementedApiServer) DeleteIpFromWhiteList(ctx context.Context, req *IpListRequest) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteIpFromWhiteList not implemented")
+func (*UnimplementedApiServer) DeleteFromWhiteList(ctx context.Context, req *IpRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFromWhiteList not implemented")
 }
 
 func RegisterApiServer(s *grpc.Server, srv ApiServer) {
@@ -354,7 +354,7 @@ func RegisterApiServer(s *grpc.Server, srv ApiServer) {
 }
 
 func _Api_ClearBucket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ClearBucketRequest)
+	in := new(DeleteBucketRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -366,7 +366,7 @@ func _Api_ClearBucket_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: "/grpc.Api/ClearBucket",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServer).ClearBucket(ctx, req.(*ClearBucketRequest))
+		return srv.(ApiServer).ClearBucket(ctx, req.(*DeleteBucketRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -389,74 +389,74 @@ func _Api_Auth_Handler(srv interface{}, ctx context.Context, dec func(interface{
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Api_AddIpInBlackList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IpListRequest)
+func _Api_AddInBlackList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IpRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiServer).AddIpInBlackList(ctx, in)
+		return srv.(ApiServer).AddInBlackList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Api/AddIpInBlackList",
+		FullMethod: "/grpc.Api/AddInBlackList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServer).AddIpInBlackList(ctx, req.(*IpListRequest))
+		return srv.(ApiServer).AddInBlackList(ctx, req.(*IpRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Api_DeleteIpFromBlackList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IpListRequest)
+func _Api_AddInWhiteList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IpRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiServer).DeleteIpFromBlackList(ctx, in)
+		return srv.(ApiServer).AddInWhiteList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Api/DeleteIpFromBlackList",
+		FullMethod: "/grpc.Api/AddInWhiteList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServer).DeleteIpFromBlackList(ctx, req.(*IpListRequest))
+		return srv.(ApiServer).AddInWhiteList(ctx, req.(*IpRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Api_AddIpInWhiteList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IpListRequest)
+func _Api_DeleteFromBlackList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IpRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiServer).AddIpInWhiteList(ctx, in)
+		return srv.(ApiServer).DeleteFromBlackList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Api/AddIpInWhiteList",
+		FullMethod: "/grpc.Api/DeleteFromBlackList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServer).AddIpInWhiteList(ctx, req.(*IpListRequest))
+		return srv.(ApiServer).DeleteFromBlackList(ctx, req.(*IpRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Api_DeleteIpFromWhiteList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IpListRequest)
+func _Api_DeleteFromWhiteList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IpRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiServer).DeleteIpFromWhiteList(ctx, in)
+		return srv.(ApiServer).DeleteFromWhiteList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Api/DeleteIpFromWhiteList",
+		FullMethod: "/grpc.Api/DeleteFromWhiteList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServer).DeleteIpFromWhiteList(ctx, req.(*IpListRequest))
+		return srv.(ApiServer).DeleteFromWhiteList(ctx, req.(*IpRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -474,20 +474,20 @@ var _Api_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Api_Auth_Handler,
 		},
 		{
-			MethodName: "AddIpInBlackList",
-			Handler:    _Api_AddIpInBlackList_Handler,
+			MethodName: "AddInBlackList",
+			Handler:    _Api_AddInBlackList_Handler,
 		},
 		{
-			MethodName: "DeleteIpFromBlackList",
-			Handler:    _Api_DeleteIpFromBlackList_Handler,
+			MethodName: "AddInWhiteList",
+			Handler:    _Api_AddInWhiteList_Handler,
 		},
 		{
-			MethodName: "AddIpInWhiteList",
-			Handler:    _Api_AddIpInWhiteList_Handler,
+			MethodName: "DeleteFromBlackList",
+			Handler:    _Api_DeleteFromBlackList_Handler,
 		},
 		{
-			MethodName: "DeleteIpFromWhiteList",
-			Handler:    _Api_DeleteIpFromWhiteList_Handler,
+			MethodName: "DeleteFromWhiteList",
+			Handler:    _Api_DeleteFromWhiteList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
