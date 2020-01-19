@@ -1,6 +1,8 @@
-package entities
+package bucket
 
-import "time"
+import (
+	"time"
+)
 
 type Bucket interface {
 	Conform(t time.Time) bool

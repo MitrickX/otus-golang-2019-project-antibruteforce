@@ -1,69 +1,69 @@
-package memory
+package ip
 
 import (
 	"testing"
 
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities/ip"
 )
 
-func TestIPList_Add(t *testing.T) {
-	list := NewIPList()
+func TestList_Add(t *testing.T) {
+	list := NewList()
 
 	var ok bool
 	var err error
 
-	ok, err = list.Add(entities.IP("127.0.0.1"))
+	ok, err = list.Add(ip.IP("127.0.0.1"))
 	assertOkResult(t, ok, err, "add ip `127.0.0.1`")
 
-	ok, err = list.Add(entities.IP("127.0.0.2"))
+	ok, err = list.Add(ip.IP("127.0.0.2"))
 	assertOkResult(t, ok, err, "add ip `127.0.0.2`")
 
-	ok, err = list.Add(entities.IP("127.0.0.1"))
+	ok, err = list.Add(ip.IP("127.0.0.1"))
 	assertOkResult(t, ok, err, "add ip `127.0.0.1` (2nd time)")
 
 	cnt, err := list.Count()
 	assertCountResult(t, 2, cnt, err, "count")
 }
 
-func TestIPList_Delete(t *testing.T) {
-	list := NewIPList()
+func TestList_Delete(t *testing.T) {
+	list := NewList()
 
 	var ok bool
 	var err error
 
-	ok, err = list.Add(entities.IP("127.0.0.1"))
+	ok, err = list.Add(ip.IP("127.0.0.1"))
 	assertOkResult(t, ok, err, "add ip `127.0.0.1`")
 
-	ok, err = list.Add(entities.IP("127.0.0.2"))
+	ok, err = list.Add(ip.IP("127.0.0.2"))
 	assertOkResult(t, ok, err, "add ip `127.0.0.2`")
 
 	// Delete not existing
-	ok, err = list.Delete(entities.IP("127.0.0.3"))
+	ok, err = list.Delete(ip.IP("127.0.0.3"))
 	assertOkResult(t, ok, err, "delete `127.0.0.3`")
 
-	ok, err = list.Delete(entities.IP("127.0.0.1"))
+	ok, err = list.Delete(ip.IP("127.0.0.1"))
 	assertOkResult(t, ok, err, "delete `127.0.0.1`")
 
 	cnt, err := list.Count()
 	assertCountResult(t, 1, cnt, err, "count")
 }
 
-func TestIPList_Has(t *testing.T) {
-	list := NewIPList()
+func TestList_Has(t *testing.T) {
+	list := NewList()
 
 	var ok bool
 	var err error
 
-	ok, err = list.Add(entities.IP("127.0.0.1"))
+	ok, err = list.Add(ip.IP("127.0.0.1"))
 	assertOkResult(t, ok, err, "add ip `127.0.0.1`")
 
-	ok, err = list.Has(entities.IP("127.0.0.1"))
+	ok, err = list.Has(ip.IP("127.0.0.1"))
 	assertOkResult(t, ok, err, "has `127.0.0.1`")
 
-	ok, err = list.Delete(entities.IP("127.0.0.1"))
+	ok, err = list.Delete(ip.IP("127.0.0.1"))
 	assertOkResult(t, ok, err, "delete ip `127.0.0.1`")
 
-	ok, err = list.Has(entities.IP("127.0.0.1"))
+	ok, err = list.Has(ip.IP("127.0.0.1"))
 	if err != nil {
 		t.Fatalf("has `127.0.0.1`: unexpected error %s", err)
 	}
@@ -72,8 +72,8 @@ func TestIPList_Has(t *testing.T) {
 	}
 }
 
-func TestIPList_Count(t *testing.T) {
-	list := NewIPList()
+func TestList_Count(t *testing.T) {
+	list := NewList()
 
 	var ok bool
 	var cnt int
@@ -82,25 +82,25 @@ func TestIPList_Count(t *testing.T) {
 	cnt, err = list.Count()
 	assertCountResult(t, 0, cnt, err, "count")
 
-	ok, err = list.Add(entities.IP("127.0.0.1"))
+	ok, err = list.Add(ip.IP("127.0.0.1"))
 	assertOkResult(t, ok, err, "add ip `127.0.0.1`")
 
 	cnt, err = list.Count()
 	assertCountResult(t, 1, cnt, err, "count")
 
-	ok, err = list.Add(entities.IP("127.0.0.2"))
+	ok, err = list.Add(ip.IP("127.0.0.2"))
 	assertOkResult(t, ok, err, "add ip `127.0.0.2`")
 
 	cnt, err = list.Count()
 	assertCountResult(t, 2, cnt, err, "count")
 
-	ok, err = list.Delete(entities.IP("127.0.0.2"))
+	ok, err = list.Delete(ip.IP("127.0.0.2"))
 	assertOkResult(t, ok, err, "delete `127.0.0.1`")
 
 	cnt, err = list.Count()
 	assertCountResult(t, 1, cnt, err, "count")
 
-	ok, err = list.Delete(entities.IP("127.0.0.1"))
+	ok, err = list.Delete(ip.IP("127.0.0.1"))
 	assertOkResult(t, ok, err, "delete `127.0.0.1`")
 
 	cnt, err = list.Count()

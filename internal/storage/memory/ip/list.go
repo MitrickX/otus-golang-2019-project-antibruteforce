@@ -1,18 +1,18 @@
-package memory
+package ip
 
 import (
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities/ip"
 )
 
-type IPList struct {
-	list []entities.IP
+type List struct {
+	list []ip.IP
 }
 
-func NewIPList() *IPList {
-	return &IPList{}
+func NewList() *List {
+	return &List{}
 }
 
-func (l *IPList) Add(ip entities.IP) (bool, error) {
+func (l *List) Add(ip ip.IP) (bool, error) {
 	index := l.search(ip)
 	if index >= 0 {
 		return true, nil
@@ -21,7 +21,7 @@ func (l *IPList) Add(ip entities.IP) (bool, error) {
 	return true, nil
 }
 
-func (l *IPList) Delete(ip entities.IP) (bool, error) {
+func (l *List) Delete(ip ip.IP) (bool, error) {
 	index := l.search(ip)
 	if index < 0 {
 		return true, nil
@@ -31,7 +31,7 @@ func (l *IPList) Delete(ip entities.IP) (bool, error) {
 	return true, nil
 }
 
-func (l *IPList) Has(ip entities.IP) (bool, error) {
+func (l *List) Has(ip ip.IP) (bool, error) {
 	index := l.search(ip)
 	if index >= 0 {
 		return true, nil
@@ -39,7 +39,7 @@ func (l *IPList) Has(ip entities.IP) (bool, error) {
 	return false, nil
 }
 
-func (l *IPList) search(ip entities.IP) int {
+func (l *List) search(ip ip.IP) int {
 	for index, value := range l.list {
 		if value == ip {
 			return index
@@ -48,6 +48,6 @@ func (l *IPList) search(ip entities.IP) int {
 	return -1
 }
 
-func (l *IPList) Count() (int, error) {
+func (l *List) Count() (int, error) {
 	return len(l.list), nil
 }
