@@ -1,13 +1,15 @@
 package ip
 
+import "context"
+
 // Ip list interface
 type List interface {
 	// Add IP into list
-	Add(ip IP) (bool, error)
+	Add(ctx context.Context, ip IP) error
 	// Delete IP from list
-	Delete(ip IP) (bool, error)
+	Delete(ctx context.Context, ip IP) error
 	// Has list this IP
-	Has(ip IP) (bool, error)
+	Has(ctx context.Context, ip IP) (bool, error)
 	// How many IPs in list
-	Count() (int, error)
+	Count(ctx context.Context) (int, error)
 }

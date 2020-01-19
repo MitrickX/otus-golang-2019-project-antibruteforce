@@ -1,6 +1,7 @@
 package bucket
 
 import (
+	"context"
 	"math/rand"
 	"testing"
 	"time"
@@ -31,19 +32,18 @@ func (e emptyBucket) Conform(t time.Time) bool {
 func TestStorage_Add(t *testing.T) {
 	storage := NewStorage()
 
-	var ok bool
 	var err error
 
-	ok, err = storage.Add(newEmptyBucket(), ip.IP("127.0.0.1"))
-	assertOkResult(t, ok, err, "add bucket for ip `127.0.0.1`")
+	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.1"))
+	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
-	ok, err = storage.Add(newEmptyBucket(), ip.IP("127.0.0.2"))
-	assertOkResult(t, ok, err, "add bucket for ip `127.0.0.2`")
+	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.2"))
+	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.2`")
 
-	ok, err = storage.Add(newEmptyBucket(), ip.IP("127.0.0.1"))
-	assertOkResult(t, ok, err, "add bucket for ip `127.0.0.1` (2nd time)")
+	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.1"))
+	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1` (2nd time)")
 
-	cnt, err := storage.Count()
+	cnt, err := storage.Count(context.Background())
 	assertCountResult(t, 2, cnt, err, "count")
 
 }
@@ -51,23 +51,22 @@ func TestStorage_Add(t *testing.T) {
 func TestStorage_Delete(t *testing.T) {
 	storage := NewStorage()
 
-	var ok bool
 	var err error
 
-	ok, err = storage.Add(newEmptyBucket(), ip.IP("127.0.0.1"))
-	assertOkResult(t, ok, err, "add bucket for ip `127.0.0.1`")
+	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.1"))
+	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
-	ok, err = storage.Add(newEmptyBucket(), ip.IP("127.0.0.2"))
-	assertOkResult(t, ok, err, "add bucket for ip `127.0.0.2`")
+	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.2"))
+	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.2`")
 
 	// Delete not existing
-	ok, err = storage.Delete(ip.IP("127.0.0.3"))
-	assertOkResult(t, ok, err, "delete bucket for `127.0.0.3`")
+	err = storage.Delete(context.Background(), ip.IP("127.0.0.3"))
+	assertNotErrorResult(t, err, "delete bucket for `127.0.0.3`")
 
-	ok, err = storage.Delete(ip.IP("127.0.0.1"))
-	assertOkResult(t, ok, err, "delete bucket for `127.0.0.1`")
+	err = storage.Delete(context.Background(), ip.IP("127.0.0.1"))
+	assertNotErrorResult(t, err, "delete bucket for `127.0.0.1`")
 
-	cnt, err := storage.Count()
+	cnt, err := storage.Count(context.Background())
 	assertCountResult(t, 1, cnt, err, "count")
 }
 
@@ -75,25 +74,24 @@ func TestStorage_Get(t *testing.T) {
 	storage := NewStorage()
 
 	var bucket bucket.Bucket
-	var ok bool
 	var err error
 
-	bucket, err = storage.Get(ip.IP("127.0.0.1"))
+	bucket, err = storage.Get(context.Background(), ip.IP("127.0.0.1"))
 	assertOkBucketGetResult(t, nil, bucket, err, "get bucket from empty storage")
 
 	expectedBucket1 := newEmptyBucket()
 	expectedBucket2 := newEmptyBucket()
 
-	ok, err = storage.Add(expectedBucket1, ip.IP("127.0.0.1"))
-	assertOkResult(t, ok, err, "add bucket for ip `127.0.0.1`")
+	err = storage.Add(context.Background(), expectedBucket1, ip.IP("127.0.0.1"))
+	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
-	ok, err = storage.Add(expectedBucket2, ip.IP("127.0.0.2"))
-	assertOkResult(t, ok, err, "add bucket for ip `127.0.0.1`")
+	err = storage.Add(context.Background(), expectedBucket2, ip.IP("127.0.0.2"))
+	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
-	bucket1, err := storage.Get(ip.IP("127.0.0.1"))
+	bucket1, err := storage.Get(context.Background(), ip.IP("127.0.0.1"))
 	assertOkBucketGetResult(t, expectedBucket1, bucket1, err, "get bucket by id `127.0.0.1`")
 
-	bucket2, err := storage.Get(ip.IP("127.0.0.2"))
+	bucket2, err := storage.Get(context.Background(), ip.IP("127.0.0.2"))
 	assertOkBucketGetResult(t, expectedBucket2, bucket2, err, "get bucket by id `127.0.0.2`")
 
 }
@@ -104,16 +102,16 @@ func TestStorage_Has(t *testing.T) {
 	var ok bool
 	var err error
 
-	ok, err = storage.Add(newEmptyBucket(), ip.IP("127.0.0.1"))
-	assertOkResult(t, ok, err, "add bucket for ip `127.0.0.1`")
+	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.1"))
+	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
-	ok, err = storage.Has(ip.IP("127.0.0.1"))
+	ok, err = storage.Has(context.Background(), ip.IP("127.0.0.1"))
 	assertOkResult(t, ok, err, "has bucket for `127.0.0.1`")
 
-	ok, err = storage.Delete(ip.IP("127.0.0.1"))
-	assertOkResult(t, ok, err, "delete bucket for ip `127.0.0.1`")
+	err = storage.Delete(context.Background(), ip.IP("127.0.0.1"))
+	assertNotErrorResult(t, err, "delete bucket for ip `127.0.0.1`")
 
-	ok, err = storage.Has(ip.IP("127.0.0.1"))
+	ok, err = storage.Has(context.Background(), ip.IP("127.0.0.1"))
 	if err != nil {
 		t.Fatalf("has bucket for `127.0.0.1`: unexpected error %s", err)
 	}
@@ -125,37 +123,42 @@ func TestStorage_Has(t *testing.T) {
 func TestStorage_Count(t *testing.T) {
 	storage := NewStorage()
 
-	var ok bool
 	var cnt int
 	var err error
 
-	cnt, err = storage.Count()
+	cnt, err = storage.Count(context.Background())
 	assertCountResult(t, 0, cnt, err, "count")
 
-	ok, err = storage.Add(newEmptyBucket(), ip.IP("127.0.0.1"))
-	assertOkResult(t, ok, err, "add bucket for ip `127.0.0.1`")
+	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.1"))
+	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
-	cnt, err = storage.Count()
+	cnt, err = storage.Count(context.Background())
 	assertCountResult(t, 1, cnt, err, "count")
 
-	ok, err = storage.Add(newEmptyBucket(), ip.IP("127.0.0.2"))
-	assertOkResult(t, ok, err, "add bucket for ip `127.0.0.2`")
+	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.2"))
+	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.2`")
 
-	cnt, err = storage.Count()
+	cnt, err = storage.Count(context.Background())
 	assertCountResult(t, 2, cnt, err, "count")
 
-	ok, err = storage.Delete(ip.IP("127.0.0.2"))
-	assertOkResult(t, ok, err, "delete bucket for `127.0.0.1`")
+	err = storage.Delete(context.Background(), ip.IP("127.0.0.2"))
+	assertNotErrorResult(t, err, "delete bucket for `127.0.0.1`")
 
-	cnt, err = storage.Count()
+	cnt, err = storage.Count(context.Background())
 	assertCountResult(t, 1, cnt, err, "count")
 
-	ok, err = storage.Delete(ip.IP("127.0.0.1"))
-	assertOkResult(t, ok, err, "delete bucket for `127.0.0.1`")
+	err = storage.Delete(context.Background(), ip.IP("127.0.0.1"))
+	assertNotErrorResult(t, err, "delete bucket for `127.0.0.1`")
 
-	cnt, err = storage.Count()
+	cnt, err = storage.Count(context.Background())
 	assertCountResult(t, 0, cnt, err, "count")
 
+}
+
+func assertNotErrorResult(t *testing.T, err error, prefix string) {
+	if err != nil {
+		t.Fatalf("%s: unexpected error %s", prefix, err)
+	}
 }
 
 func assertOkResult(t *testing.T, ok bool, err error, prefix string) {

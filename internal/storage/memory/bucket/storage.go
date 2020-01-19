@@ -1,6 +1,7 @@
 package bucket
 
 import (
+	"context"
 	"sync"
 
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities/bucket"
@@ -18,21 +19,21 @@ func NewStorage() *Storage {
 	}
 }
 
-func (s *Storage) Add(bucket bucket.Bucket, key interface{}) (bool, error) {
+func (s *Storage) Add(ctx context.Context, bucket bucket.Bucket, key interface{}) error {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 	s.m[key] = bucket
-	return true, nil
+	return nil
 }
 
-func (s *Storage) Delete(key interface{}) (bool, error) {
+func (s *Storage) Delete(ctx context.Context, key interface{}) error {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 	delete(s.m, key)
-	return true, nil
+	return nil
 }
 
-func (s *Storage) Get(key interface{}) (bucket.Bucket, error) {
+func (s *Storage) Get(ctx context.Context, key interface{}) (bucket.Bucket, error) {
 	s.mx.RLock()
 	defer s.mx.RUnlock()
 	bucket, has := s.m[key]
@@ -42,14 +43,14 @@ func (s *Storage) Get(key interface{}) (bucket.Bucket, error) {
 	return bucket, nil
 }
 
-func (s *Storage) Has(key interface{}) (bool, error) {
+func (s *Storage) Has(ctx context.Context, key interface{}) (bool, error) {
 	s.mx.RLock()
 	defer s.mx.RUnlock()
 	_, has := s.m[key]
 	return has, nil
 }
 
-func (s *Storage) Count() (int, error) {
+func (s *Storage) Count(context.Context) (int, error) {
 	s.mx.RLock()
 	defer s.mx.RUnlock()
 	return len(s.m), nil
