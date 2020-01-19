@@ -12,62 +12,62 @@ func TestLeakyBucket_Conform(t *testing.T) {
 	bucket := NewLeakyBucket(increment, limit)
 
 	type packet struct {
-		arrival   int64
-		conformed bool
+		arrival int64
+		conform bool
 	}
 
 	expected := []packet{
 		{
-			arrival:   2,
-			conformed: true,
+			arrival: 2,
+			conform: true,
 		},
 		{
-			arrival:   3,
-			conformed: true,
+			arrival: 3,
+			conform: true,
 		},
 		{
-			arrival:   6,
-			conformed: true,
+			arrival: 6,
+			conform: true,
 		},
 		{
-			arrival:   9,
-			conformed: true,
+			arrival: 9,
+			conform: true,
 		},
 		{
-			arrival:   11,
-			conformed: false,
+			arrival: 11,
+			conform: false,
 		},
 		{
-			arrival:   16,
-			conformed: true,
+			arrival: 16,
+			conform: true,
 		},
 		{
-			arrival:   23,
-			conformed: true,
+			arrival: 23,
+			conform: true,
 		},
 		{
-			arrival:   24,
-			conformed: true,
+			arrival: 24,
+			conform: true,
 		},
 		{
-			arrival:   25,
-			conformed: true,
+			arrival: 25,
+			conform: true,
 		},
 		{
-			arrival:   26,
-			conformed: false,
+			arrival: 26,
+			conform: false,
 		},
 		{
-			arrival:   30,
-			conformed: true,
+			arrival: 30,
+			conform: true,
 		},
 	}
 
 	for i := 0; i < len(expected); i++ {
 		tm := time.Unix(0, expected[i].arrival)
-		conformed := bucket.Conform(tm)
-		if conformed != expected[i].conformed {
-			t.Errorf("unexpected that packet %d with time arrival %d has conformed status(%t)", i, expected[i].arrival, conformed)
+		conform := bucket.IsConform(tm)
+		if conform != expected[i].conform {
+			t.Errorf("unexpected that packet %d with time arrival %d has conform status(%t)", i, expected[i].arrival, conform)
 		}
 	}
 

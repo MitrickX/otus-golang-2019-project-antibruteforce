@@ -4,9 +4,8 @@ package grpc;
 
 // protoc --go_out=plugins=grpc:./../internal/grpc api.proto
 
-message Response {
-    bool ok = 1;
-}
+
+message None {}
 
 message AuthRequest {
     string login = 1;
@@ -14,20 +13,25 @@ message AuthRequest {
     string ip = 3;
 }
 
-message DeleteBucketRequest {
-    string login = 1;
-    string ip = 2;
-}
-
 message IPRequest {
     string ip = 1;
 }
 
+message BucketRequest {
+    string login = 1;
+    string password = 2;
+    string ip = 3;
+}
+
+message OkResponse {
+    bool ok = 1;
+}
+
 service Api {
-    rpc ClearBucket(DeleteBucketRequest)    returns (Response) {};
-    rpc Auth(AuthRequest)                   returns (Response) {};
-    rpc AddInBlackList(IPRequest)           returns (Response) {};
-    rpc AddInWhiteList(IPRequest)           returns (Response) {};
-    rpc DeleteFromBlackList(IPRequest)      returns (Response) {};
-    rpc DeleteFromWhiteList(IPRequest)      returns (Response) {};
+    rpc AddInBlackList (IPRequest)      returns (None) {};
+    rpc AddInWhiteList (IPRequest)      returns (None) {};
+    rpc DeleteFromBlackList (IPRequest) returns (None) {};
+    rpc DeleteFromWhiteList (IPRequest) returns (None) {};
+    rpc ClearBucket(BucketRequest)      returns (None) {};
+    rpc Auth(AuthRequest)               returns (OkResponse) {};
 }

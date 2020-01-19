@@ -21,7 +21,7 @@ func NewLeakyBucket(increment time.Duration, limit time.Duration) *LeakyBucket {
 	return &LeakyBucket{increment: increment, limit: limit, lct: -1}
 }
 
-func (b *LeakyBucket) Conform(t time.Time) bool {
+func (b *LeakyBucket) IsConform(t time.Time) bool {
 	b.mx.Lock()
 	defer b.mx.Unlock()
 

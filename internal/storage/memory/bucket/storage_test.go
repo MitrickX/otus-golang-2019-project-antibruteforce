@@ -25,7 +25,7 @@ func newEmptyBucket() emptyBucket {
 	}
 }
 
-func (e emptyBucket) Conform(t time.Time) bool {
+func (e emptyBucket) IsConform(t time.Time) bool {
 	return true
 }
 

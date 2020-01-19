@@ -32,7 +32,7 @@ func NewTokenBucketByLimitInMinute(limit uint) *TokenBucket {
 	return NewTokenBucket(limit, d)
 }
 
-func (b *TokenBucket) Conform(t time.Time) bool {
+func (b *TokenBucket) IsConform(t time.Time) bool {
 	b.mx.Lock()
 	defer b.mx.Unlock()
 
@@ -46,7 +46,7 @@ func (b *TokenBucket) Conform(t time.Time) bool {
 
 	if b.count > 0 {
 		b.count--            // conform packet, consume one token
-		b.lct = t.UnixNano() // last conformed time
+		b.lct = t.UnixNano() // last conform time
 		return true
 	}
 

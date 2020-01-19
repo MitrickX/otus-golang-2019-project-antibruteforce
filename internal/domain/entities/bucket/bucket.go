@@ -5,5 +5,5 @@ import (
 )
 
 type Bucket interface {
-	Conform(t time.Time) bool
+	IsConform(t time.Time) bool
 }
