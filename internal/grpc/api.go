@@ -1,20 +1,21 @@
 package grpc
 
 import (
-	context "context"
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities/bucket"
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities/ip"
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
+
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/storage/memory/bucket"
 )
 
 type API struct {
-	blackList              ip.List
-	whiteList              ip.List
-	loginBucketsStorage    bucket.Storage
-	passwordBucketsStorage bucket.Storage
-	ipBucketsStorage       bucket.Storage
+	blackList              entities.IPList
+	whiteList              entities.IPList
+	loginBucketsStorage    entities.BucketStorage
+	passwordBucketsStorage entities.BucketStorage
+	ipBucketsStorage       entities.BucketStorage
 	nowTimeFn              func() time.Time
 }
 
@@ -27,7 +28,7 @@ func NewAPI() *API {
 }
 
 func (a *API) AddInBlackList(ctx context.Context, request *IPRequest) (*None, error) {
-	ip := ip.IP(request.Ip)
+	ip := entities.IP(request.Ip)
 	err := a.blackList.Add(ctx, ip)
 	if err != nil {
 		return nil, err
@@ -36,7 +37,7 @@ func (a *API) AddInBlackList(ctx context.Context, request *IPRequest) (*None, er
 }
 
 func (a *API) AddInWhiteList(ctx context.Context, request *IPRequest) (*None, error) {
-	ip := ip.IP(request.Ip)
+	ip := entities.IP(request.Ip)
 	err := a.whiteList.Add(ctx, ip)
 	if err != nil {
 		return nil, err
@@ -45,7 +46,7 @@ func (a *API) AddInWhiteList(ctx context.Context, request *IPRequest) (*None, er
 }
 
 func (a *API) DeleteFromBlackList(ctx context.Context, request *IPRequest) (*None, error) {
-	ip := ip.IP(request.Ip)
+	ip := entities.IP(request.Ip)
 	err := a.blackList.Delete(ctx, ip)
 	if err != nil {
 		return nil, err
@@ -54,8 +55,8 @@ func (a *API) DeleteFromBlackList(ctx context.Context, request *IPRequest) (*Non
 }
 
 func (a *API) DeleteFromWhiteList(ctx context.Context, request *IPRequest) (*None, error) {
-	ip := ip.IP(request.Ip)
-	err := a.blackList.Delete(ctx, ip)
+	ip := entities.IP(request.Ip)
+	err := a.whiteList.Delete(ctx, ip)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +76,7 @@ func (a *API) ClearBucket(ctx context.Context, request *BucketRequest) (*None, e
 		return nil, err
 	}
 
-	err = deleteFromBucketStorage(ctx, a.ipBucketsStorage, ip.IP(request.Ip), "ip")
+	err = deleteFromBucketStorage(ctx, a.ipBucketsStorage, entities.IP(request.Ip), "ip")
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func (a *API) ClearBucket(ctx context.Context, request *BucketRequest) (*None, e
 }
 
 func (a *API) Auth(ctx context.Context, request *AuthRequest) (*OkResponse, error) {
-	ip := ip.IP(request.Ip)
+	ip := entities.IP(request.Ip)
 
 	var err error
 	var conform bool
@@ -133,16 +134,16 @@ func (a *API) Auth(ctx context.Context, request *AuthRequest) (*OkResponse, erro
 
 }
 
-func (a *API) isConformByWhiteList(ctx context.Context, ip ip.IP) (bool, error) {
-	return a.whiteList.Has(ctx, ip)
+func (a *API) isConformByWhiteList(ctx context.Context, ip entities.IP) (bool, error) {
+	return a.whiteList.IsConform(ctx, ip)
 }
 
-func (a *API) isConformByBlackList(ctx context.Context, ip ip.IP) (bool, error) {
-	return a.blackList.Has(ctx, ip)
+func (a *API) isConformByBlackList(ctx context.Context, ip entities.IP) (bool, error) {
+	return a.blackList.IsConform(ctx, ip)
 }
 
-func (a *API) isConformByIPBucket(ctx context.Context, ip ip.IP) (bool, error) {
-	var b bucket.Bucket
+func (a *API) isConformByIPBucket(ctx context.Context, ip entities.IP) (bool, error) {
+	var b entities.Bucket
 	var err error
 
 	b, err = a.getIPBucket(ctx, ip)
@@ -154,7 +155,7 @@ func (a *API) isConformByIPBucket(ctx context.Context, ip ip.IP) (bool, error) {
 }
 
 func (a *API) isConformByPasswordBucket(ctx context.Context, password string) (bool, error) {
-	var b bucket.Bucket
+	var b entities.Bucket
 	var err error
 
 	b, err = a.getPasswordBucket(ctx, password)
@@ -166,7 +167,7 @@ func (a *API) isConformByPasswordBucket(ctx context.Context, password string) (b
 }
 
 func (a *API) isConformByLoginBucket(ctx context.Context, login string) (bool, error) {
-	var b bucket.Bucket
+	var b entities.Bucket
 	var err error
 
 	b, err = a.getLoginBucket(ctx, login)
@@ -177,20 +178,20 @@ func (a *API) isConformByLoginBucket(ctx context.Context, login string) (bool, e
 	return b.IsConform(a.nowTimeFn()), nil
 }
 
-func (a *API) getIPBucket(ctx context.Context, ip ip.IP) (bucket.Bucket, error) {
+func (a *API) getIPBucket(ctx context.Context, ip entities.IP) (entities.Bucket, error) {
 	return getBucketFromStorage(ctx, a.ipBucketsStorage, ip, 1000)
 }
 
-func (a *API) getPasswordBucket(ctx context.Context, password string) (bucket.Bucket, error) {
+func (a *API) getPasswordBucket(ctx context.Context, password string) (entities.Bucket, error) {
 	return getBucketFromStorage(ctx, a.passwordBucketsStorage, password, 100)
 }
 
-func (a *API) getLoginBucket(ctx context.Context, login string) (bucket.Bucket, error) {
+func (a *API) getLoginBucket(ctx context.Context, login string) (entities.Bucket, error) {
 	return getBucketFromStorage(ctx, a.loginBucketsStorage, login, 10)
 }
 
-func getBucketFromStorage(ctx context.Context, storage bucket.Storage, key interface{}, limit uint) (bucket.Bucket, error) {
-	var b bucket.Bucket
+func getBucketFromStorage(ctx context.Context, storage entities.BucketStorage, key interface{}, limit uint) (entities.Bucket, error) {
+	var b entities.Bucket
 	var err error
 
 	b, err = storage.Get(ctx, key)
@@ -211,7 +212,7 @@ func getBucketFromStorage(ctx context.Context, storage bucket.Storage, key inter
 
 }
 
-func deleteFromBucketStorage(ctx context.Context, storage bucket.Storage, key interface{}, name string) error {
+func deleteFromBucketStorage(ctx context.Context, storage entities.BucketStorage, key interface{}, name string) error {
 	err := storage.Delete(ctx, key)
 	if err != nil {
 		return fmt.Errorf("error while deleting from %s bucket storage %s", name, err)

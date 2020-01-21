@@ -6,9 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities/bucket"
-
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities/ip"
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
 )
 
 type emptyBucket struct {
@@ -34,13 +32,13 @@ func TestStorage_Add(t *testing.T) {
 
 	var err error
 
-	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.1"))
+	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
-	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.2"))
+	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.2"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.2`")
 
-	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.1"))
+	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1` (2nd time)")
 
 	cnt, err := storage.Count(context.Background())
@@ -53,17 +51,17 @@ func TestStorage_Delete(t *testing.T) {
 
 	var err error
 
-	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.1"))
+	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
-	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.2"))
+	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.2"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.2`")
 
 	// Delete not existing
-	err = storage.Delete(context.Background(), ip.IP("127.0.0.3"))
+	err = storage.Delete(context.Background(), entities.IP("127.0.0.3"))
 	assertNotErrorResult(t, err, "delete bucket for `127.0.0.3`")
 
-	err = storage.Delete(context.Background(), ip.IP("127.0.0.1"))
+	err = storage.Delete(context.Background(), entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "delete bucket for `127.0.0.1`")
 
 	cnt, err := storage.Count(context.Background())
@@ -73,25 +71,25 @@ func TestStorage_Delete(t *testing.T) {
 func TestStorage_Get(t *testing.T) {
 	storage := NewStorage()
 
-	var bucket bucket.Bucket
+	var bucket entities.Bucket
 	var err error
 
-	bucket, err = storage.Get(context.Background(), ip.IP("127.0.0.1"))
+	bucket, err = storage.Get(context.Background(), entities.IP("127.0.0.1"))
 	assertOkBucketGetResult(t, nil, bucket, err, "get bucket from empty storage")
 
 	expectedBucket1 := newEmptyBucket()
 	expectedBucket2 := newEmptyBucket()
 
-	err = storage.Add(context.Background(), expectedBucket1, ip.IP("127.0.0.1"))
+	err = storage.Add(context.Background(), expectedBucket1, entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
-	err = storage.Add(context.Background(), expectedBucket2, ip.IP("127.0.0.2"))
+	err = storage.Add(context.Background(), expectedBucket2, entities.IP("127.0.0.2"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
-	bucket1, err := storage.Get(context.Background(), ip.IP("127.0.0.1"))
+	bucket1, err := storage.Get(context.Background(), entities.IP("127.0.0.1"))
 	assertOkBucketGetResult(t, expectedBucket1, bucket1, err, "get bucket by id `127.0.0.1`")
 
-	bucket2, err := storage.Get(context.Background(), ip.IP("127.0.0.2"))
+	bucket2, err := storage.Get(context.Background(), entities.IP("127.0.0.2"))
 	assertOkBucketGetResult(t, expectedBucket2, bucket2, err, "get bucket by id `127.0.0.2`")
 
 }
@@ -102,16 +100,16 @@ func TestStorage_Has(t *testing.T) {
 	var ok bool
 	var err error
 
-	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.1"))
+	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
-	ok, err = storage.Has(context.Background(), ip.IP("127.0.0.1"))
+	ok, err = storage.Has(context.Background(), entities.IP("127.0.0.1"))
 	assertOkResult(t, ok, err, "has bucket for `127.0.0.1`")
 
-	err = storage.Delete(context.Background(), ip.IP("127.0.0.1"))
+	err = storage.Delete(context.Background(), entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "delete bucket for ip `127.0.0.1`")
 
-	ok, err = storage.Has(context.Background(), ip.IP("127.0.0.1"))
+	ok, err = storage.Has(context.Background(), entities.IP("127.0.0.1"))
 	if err != nil {
 		t.Fatalf("has bucket for `127.0.0.1`: unexpected error %s", err)
 	}
@@ -129,25 +127,25 @@ func TestStorage_Count(t *testing.T) {
 	cnt, err = storage.Count(context.Background())
 	assertCountResult(t, 0, cnt, err, "count")
 
-	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.1"))
+	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
 	cnt, err = storage.Count(context.Background())
 	assertCountResult(t, 1, cnt, err, "count")
 
-	err = storage.Add(context.Background(), newEmptyBucket(), ip.IP("127.0.0.2"))
+	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.2"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.2`")
 
 	cnt, err = storage.Count(context.Background())
 	assertCountResult(t, 2, cnt, err, "count")
 
-	err = storage.Delete(context.Background(), ip.IP("127.0.0.2"))
+	err = storage.Delete(context.Background(), entities.IP("127.0.0.2"))
 	assertNotErrorResult(t, err, "delete bucket for `127.0.0.1`")
 
 	cnt, err = storage.Count(context.Background())
 	assertCountResult(t, 1, cnt, err, "count")
 
-	err = storage.Delete(context.Background(), ip.IP("127.0.0.1"))
+	err = storage.Delete(context.Background(), entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "delete bucket for `127.0.0.1`")
 
 	cnt, err = storage.Count(context.Background())
@@ -179,7 +177,7 @@ func assertCountResult(t *testing.T, expected int, count int, err error, prefix 
 	}
 }
 
-func assertOkBucketGetResult(t *testing.T, expected bucket.Bucket, test bucket.Bucket, err error, prefix string) {
+func assertOkBucketGetResult(t *testing.T, expected entities.Bucket, test entities.Bucket, err error, prefix string) {
 	if err != nil {
 		t.Fatalf("%s: unexpected error %s", prefix, err)
 	}
