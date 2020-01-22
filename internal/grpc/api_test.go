@@ -31,6 +31,7 @@ func newTestAPI() *API {
 	}
 }
 
+// Run test grpc server
 func runTestAPI(listener *bufconn.Listener) (a *API, resultCh chan error) {
 
 	resultCh = make(chan error, 1)
@@ -50,6 +51,7 @@ func runTestAPI(listener *bufconn.Listener) (a *API, resultCh chan error) {
 	return
 }
 
+// Run test grpc client
 func runTestClient(listener *bufconn.Listener) (client ApiClient, resultCh chan error) {
 	resultCh = make(chan error, 1)
 
@@ -66,6 +68,7 @@ func runTestClient(listener *bufconn.Listener) (client ApiClient, resultCh chan 
 	return
 }
 
+// Run Server and Client for grpc that bound with pipe in memory
 func runTestPipe(t *testing.T) (*API, ApiClient) {
 
 	listener := bufconn.Listen(bufConnSize)
@@ -106,6 +109,7 @@ func runTestPipe(t *testing.T) (*API, ApiClient) {
 	return service, client
 }
 
+// Test that ip correct added in black list
 func TestAPI_AddInBlackList(t *testing.T) {
 	api, client := runTestPipe(t)
 
@@ -116,6 +120,7 @@ func TestAPI_AddInBlackList(t *testing.T) {
 	assertCountResult(t, 1, cnt, err, "count in blacklist after add ip `127.0.0.1`")
 }
 
+// Test that ip correct deleted from black list
 func TestAPI_DeleteFromBlackList(t *testing.T) {
 	api, client := runTestPipe(t)
 
@@ -132,6 +137,7 @@ func TestAPI_DeleteFromBlackList(t *testing.T) {
 	assertCountResult(t, 1, cnt, err, "count in blacklist after one 2 and delete 1 IPs")
 }
 
+// Test that ip correct added in white list
 func TestAPI_AddInWhiteList(t *testing.T) {
 	api, client := runTestPipe(t)
 
@@ -142,6 +148,7 @@ func TestAPI_AddInWhiteList(t *testing.T) {
 	assertCountResult(t, 1, cnt, err, "count in whitelist after add ip `127.0.0.1`")
 }
 
+// Test that ip correct deleted from white list
 func TestAPI_DeleteFromWhiteList(t *testing.T) {
 	api, client := runTestPipe(t)
 
@@ -158,6 +165,7 @@ func TestAPI_DeleteFromWhiteList(t *testing.T) {
 	assertCountResult(t, 1, cnt, err, "count in whitelist after one 2 and delete 1 IPs")
 }
 
+// Test that bucket correct deleted for specified login
 func TestAPI_ClearBucketForLogin(t *testing.T) {
 	api, client := runTestPipe(t)
 
@@ -171,6 +179,7 @@ func TestAPI_ClearBucketForLogin(t *testing.T) {
 	assertCountResult(t, 0, cnt, err, "count after delete bucket for login `test`")
 }
 
+// Test that bucket correct deleted for specified password
 func TestAPI_ClearBucketForPassword(t *testing.T) {
 	api, client := runTestPipe(t)
 
@@ -184,6 +193,7 @@ func TestAPI_ClearBucketForPassword(t *testing.T) {
 	assertCountResult(t, 0, cnt, err, "count after delete bucket for password `1234`")
 }
 
+// Test that bucket correct deleted for specified ip
 func TestAPI_ClearBucketForIP(t *testing.T) {
 	api, client := runTestPipe(t)
 
@@ -202,14 +212,14 @@ func TestAPI_ClearBucketForIP(t *testing.T) {
 
 }
 
-func TestAPI_AuthIPInWhiteList(t *testing.T) {
+// Test auth when ip conform white list, because ip in white list
+func TestAPI_AuthIPConformWhiteList(t *testing.T) {
 	api, client := runTestPipe(t)
 
-	ip := entities.IP("127.0.0.1")
-	b := bucket.NewTokenBucketByLimitInMinute(1)
+	// limit for ip bucket
+	api.ipBucketLimit = 1
 
-	err := api.ipBucketsStorage.Add(context.Background(), b, ip)
-	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
+	ip := entities.IP("127.0.0.1")
 
 	// now we have for ip bucket that overflowing after 1 try
 	// but we add this ip in white list, so actually doesn't matter what status of bucket is
@@ -232,7 +242,38 @@ func TestAPI_AuthIPInWhiteList(t *testing.T) {
 	assertOkResponse(t, true, response, err, "2nd auth of ip `127.0.0.1`")
 }
 
-func TestApi_AuthIPInBlackList(t *testing.T) {
+// Test auth when ip conform white list, because there is subnet ip in white list that conform this ip
+func TestAPI_AuthIPConformWhiteList2(t *testing.T) {
+	api, client := runTestPipe(t)
+
+	api.ipBucketLimit = 1
+
+	ip := entities.IP("127.0.0.1")
+	subnetIP := entities.IP("127.0.0.0/24")
+
+	// now we have for ip bucket that overflowing after 1 try
+	// but we add this ip in white list, so actually doesn't matter what status of bucket is
+	_, _ = client.AddInWhiteList(context.Background(), &IPRequest{Ip: string(subnetIP)})
+
+	// first auth try, must be ok
+	response, err := client.Auth(context.Background(), &AuthRequest{
+		Login:    "test",
+		Password: "1234",
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, true, response, err, "1st auth of ip `127.0.0.1`")
+
+	// second auth try, must be ok cause of white list
+	response, err = client.Auth(context.Background(), &AuthRequest{
+		Login:    "test",
+		Password: "1234",
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, true, response, err, "2nd auth of ip `127.0.0.1`")
+}
+
+// Test auth when ip conform black list, because ip in black list
+func TestApi_AuthIPConformBlackList1(t *testing.T) {
 	_, client := runTestPipe(t)
 
 	ip := entities.IP("127.0.0.1")
@@ -254,7 +295,268 @@ func TestApi_AuthIPInBlackList(t *testing.T) {
 		Ip:       string(ip),
 	})
 	assertOkResponse(t, false, response, err, "2nd auth of ip `127.0.0.1`")
+}
 
+// Test auth when ip conform black list, because there is subnet ip in white list that conform this ip
+func TestApi_AuthIPConformBlackList2(t *testing.T) {
+	_, client := runTestPipe(t)
+
+	ip := entities.IP("127.0.0.1")
+	subnetIP := entities.IP("127.0.0.0/24")
+
+	_, _ = client.AddInBlackList(context.Background(), &IPRequest{Ip: string(subnetIP)})
+
+	// auth try must return false, cause ip in black list
+	response, err := client.Auth(context.Background(), &AuthRequest{
+		Login:    "test",
+		Password: "1234",
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, false, response, err, "1st auth of ip `127.0.0.1`")
+
+	// auth try must return false, cause ip in black list
+	response, err = client.Auth(context.Background(), &AuthRequest{
+		Login:    "test",
+		Password: "1234",
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, false, response, err, "2nd auth of ip `127.0.0.1`")
+
+}
+
+// Test auth when login bucket is overflowing
+func TestAPI_AuthOverflowLoginBucket(t *testing.T) {
+	api, client := runTestPipe(t)
+
+	api.loginBucketLimit = 1
+	api.passwordBucketLimit = 100
+	api.ipBucketLimit = 1000
+
+	ip := entities.IP("127.0.0.1")
+	login := "test"
+
+	// first try for this login must return true
+	response, err := client.Auth(context.Background(), &AuthRequest{
+		Login:    login,
+		Password: "1234",
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, true, response, err, fmt.Sprintf("1st auth for login `%s`", login))
+
+	// second try for this login must return false, cause of overflowing
+	response, err = client.Auth(context.Background(), &AuthRequest{
+		Login:    login,
+		Password: "1234",
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, false, response, err, fmt.Sprintf("2d auth for same login `%s`", login))
+
+	login = "test2"
+
+	// first try for different login must return true - new bucket
+	response, err = client.Auth(context.Background(), &AuthRequest{
+		Login:    login,
+		Password: "1234",
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, true, response, err, fmt.Sprintf("1st auth for different login `%s`", login))
+
+}
+
+// Test auth when login bucket is not overflowing
+func TestAPI_AuthNotOverflowLoginBucket(t *testing.T) {
+	api, client := runTestPipe(t)
+
+	// limit is 1 try in minute for each login
+	api.loginBucketLimit = 1
+	api.passwordBucketLimit = 100
+	api.ipBucketLimit = 1000
+
+	// deterministic timing
+	nowTime := time.Now()
+	api.nowTimeFn = func() time.Time {
+		return nowTime
+	}
+
+	ip := entities.IP("127.0.0.1")
+	login := "test"
+
+	// first try for this login must return true
+	response, err := client.Auth(context.Background(), &AuthRequest{
+		Login:    login,
+		Password: "1234",
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, true, response, err, fmt.Sprintf("1st auth for login `%s`", login))
+
+	// "wait" 1 minute
+	api.nowTimeFn = func() time.Time {
+		return nowTime.Add(time.Minute)
+	}
+
+	// second try for this login must return true, cause we wait and not exceed limit 1 time in minute
+	response, err = client.Auth(context.Background(), &AuthRequest{
+		Login:    login,
+		Password: "1234",
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, true, response, err, fmt.Sprintf("2d auth for same login but after 1 minute wait`%s`", login))
+}
+
+// Test auth when password bucket is overflowing
+func TestAPI_AuthOverflowPasswordBucket(t *testing.T) {
+	api, client := runTestPipe(t)
+
+	api.loginBucketLimit = 10
+	api.passwordBucketLimit = 1 // limit 1 try in minute for each password
+	api.ipBucketLimit = 1000
+
+	ip := entities.IP("127.0.0.1")
+	password := "1234"
+
+	// first try for this password must return true
+	response, err := client.Auth(context.Background(), &AuthRequest{
+		Login:    "test",
+		Password: password,
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, true, response, err, fmt.Sprintf("1st auth for password `%s`", password))
+
+	// second try for this password must return false, cause of overflowing
+	response, err = client.Auth(context.Background(), &AuthRequest{
+		Login:    "test2", // even if different login
+		Password: password,
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, false, response, err, fmt.Sprintf("2d auth for same password `%s`", password))
+
+	// try different password
+	password = "4567"
+
+	// first try for different password must return true - new bucket
+	response, err = client.Auth(context.Background(), &AuthRequest{
+		Login:    "test3",
+		Password: password,
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, true, response, err, fmt.Sprintf("1st auth for different password `%s`", password))
+
+}
+
+// Test auth when password bucket is overflowing
+func TestAPI_AuthNotOverflowPasswordBucket(t *testing.T) {
+	api, client := runTestPipe(t)
+
+	api.loginBucketLimit = 10
+	api.passwordBucketLimit = 1 // limit 1 try in minute for each password
+	api.ipBucketLimit = 1000
+
+	// deterministic timing
+	nowTime := time.Now()
+	api.nowTimeFn = func() time.Time {
+		return nowTime
+	}
+
+	ip := entities.IP("127.0.0.1")
+	password := "1234"
+
+	// first try for this password must return true
+	response, err := client.Auth(context.Background(), &AuthRequest{
+		Login:    "test",
+		Password: password,
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, true, response, err, fmt.Sprintf("1st auth for password `%s`", password))
+
+	// "wait" 1 minute
+	api.nowTimeFn = func() time.Time {
+		return nowTime.Add(time.Minute)
+	}
+
+	// second try for same password must return true, cause we wait and not exceed limit 1 time in minute
+	response, err = client.Auth(context.Background(), &AuthRequest{
+		Login:    "test", // even if for the same login
+		Password: password,
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, true, response, err, fmt.Sprintf("2d auth for same password but after 1 minute wait `%s`", password))
+}
+
+// Test auth when ip bucket is overflowing
+func TestAPI_AuthOverflowIPBucket(t *testing.T) {
+	api, client := runTestPipe(t)
+
+	api.loginBucketLimit = 10
+	api.passwordBucketLimit = 10
+	api.ipBucketLimit = 1 // limit 1 try in minute for each IP
+
+	ip := entities.IP("127.0.0.1")
+
+	// first try for this ip must return true
+	response, err := client.Auth(context.Background(), &AuthRequest{
+		Login:    "test",
+		Password: "1234",
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, true, response, err, fmt.Sprintf("1st auth for ip `%s`", ip))
+
+	// second try for this ip must return false, cause of overflowing
+	response, err = client.Auth(context.Background(), &AuthRequest{
+		Login:    "test2", // even if different login and password
+		Password: "5678",
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, false, response, err, fmt.Sprintf("2d auth for same ip `%s`", ip))
+
+	// try different ip
+	ip = entities.IP("127.0.0.2")
+
+	// first try for different ip must return true - new bucket
+	response, err = client.Auth(context.Background(), &AuthRequest{
+		Login:    "test",
+		Password: "1234",
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, true, response, err, fmt.Sprintf("1st auth for different ip `%s`", ip))
+
+}
+
+// Test auth when ip bucket is overflowing
+func TestAPI_AuthNotOverflowIPBucket(t *testing.T) {
+	api, client := runTestPipe(t)
+
+	api.loginBucketLimit = 10
+	api.passwordBucketLimit = 10
+	api.ipBucketLimit = 1 // limit 1 try in minute for each IP
+
+	// deterministic timing
+	nowTime := time.Now()
+	api.nowTimeFn = func() time.Time {
+		return nowTime
+	}
+
+	ip := entities.IP("127.0.0.1")
+
+	// first try for this ip must return true
+	response, err := client.Auth(context.Background(), &AuthRequest{
+		Login:    "test",
+		Password: "1234",
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, true, response, err, fmt.Sprintf("1st auth for ip `%s`", ip))
+
+	// "wait" 1 minute
+	api.nowTimeFn = func() time.Time {
+		return nowTime.Add(time.Minute)
+	}
+
+	// second try for same ip must return true, cause we wait and not exceed limit 1 time in minute
+	response, err = client.Auth(context.Background(), &AuthRequest{
+		Login:    "test", // even if for the same login
+		Password: "1234",
+		Ip:       string(ip),
+	})
+	assertOkResponse(t, true, response, err, fmt.Sprintf("2d auth for same ip but after 1 minute wait `%s`", ip))
 }
 
 func assertNotErrorResult(t *testing.T, err error, prefix string) {

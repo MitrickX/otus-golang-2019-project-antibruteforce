@@ -16,6 +16,9 @@ type API struct {
 	loginBucketsStorage    entities.BucketStorage
 	passwordBucketsStorage entities.BucketStorage
 	ipBucketsStorage       entities.BucketStorage
+	loginBucketLimit       uint
+	passwordBucketLimit    uint
+	ipBucketLimit          uint
 	nowTimeFn              func() time.Time
 }
 
@@ -24,6 +27,9 @@ func NewAPI() *API {
 		nowTimeFn: func() time.Time {
 			return time.Now()
 		},
+		loginBucketLimit:    10,
+		passwordBucketLimit: 100,
+		ipBucketLimit:       1000,
 	}
 }
 
@@ -179,15 +185,15 @@ func (a *API) isConformByLoginBucket(ctx context.Context, login string) (bool, e
 }
 
 func (a *API) getIPBucket(ctx context.Context, ip entities.IP) (entities.Bucket, error) {
-	return getBucketFromStorage(ctx, a.ipBucketsStorage, ip, 1000)
+	return getBucketFromStorage(ctx, a.ipBucketsStorage, ip, a.ipBucketLimit)
 }
 
 func (a *API) getPasswordBucket(ctx context.Context, password string) (entities.Bucket, error) {
-	return getBucketFromStorage(ctx, a.passwordBucketsStorage, password, 100)
+	return getBucketFromStorage(ctx, a.passwordBucketsStorage, password, a.passwordBucketLimit)
 }
 
 func (a *API) getLoginBucket(ctx context.Context, login string) (entities.Bucket, error) {
-	return getBucketFromStorage(ctx, a.loginBucketsStorage, login, 10)
+	return getBucketFromStorage(ctx, a.loginBucketsStorage, login, a.loginBucketLimit)
 }
 
 func getBucketFromStorage(ctx context.Context, storage entities.BucketStorage, key interface{}, limit uint) (entities.Bucket, error) {
