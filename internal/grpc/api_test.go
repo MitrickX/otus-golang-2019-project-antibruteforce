@@ -20,11 +20,11 @@ var bufConnSize = 4096
 
 func newTestAPI() *API {
 	return &API{
-		blackList:              ip.NewList(),
-		whiteList:              ip.NewList(),
-		loginBucketsStorage:    bucket.NewStorage(),
-		passwordBucketsStorage: bucket.NewStorage(),
-		ipBucketsStorage:       bucket.NewStorage(),
+		BlackList:              ip.NewList(),
+		WhiteList:              ip.NewList(),
+		LoginBucketsStorage:    bucket.NewStorage(),
+		PasswordBucketsStorage: bucket.NewStorage(),
+		IPBucketsStorage:       bucket.NewStorage(),
 		nowTimeFn: func() time.Time {
 			return time.Now()
 		},
@@ -116,7 +116,7 @@ func TestAPI_AddInBlackList(t *testing.T) {
 	_, err := client.AddInBlackList(context.Background(), &IPRequest{Ip: "127.0.0.1"})
 	assertNotErrorResult(t, err, "add in blacklist ip `127.0.0.1`")
 
-	cnt, err := api.blackList.Count(context.Background())
+	cnt, err := api.BlackList.Count(context.Background())
 	assertCountResult(t, 1, cnt, err, "count in blacklist after add ip `127.0.0.1`")
 }
 
@@ -133,7 +133,7 @@ func TestAPI_DeleteFromBlackList(t *testing.T) {
 	_, err = client.DeleteFromBlackList(context.Background(), &IPRequest{Ip: "127.0.0.1"})
 	assertNotErrorResult(t, err, "delete from blacklist ip `127.0.0.1`")
 
-	cnt, err := api.blackList.Count(context.Background())
+	cnt, err := api.BlackList.Count(context.Background())
 	assertCountResult(t, 1, cnt, err, "count in blacklist after one 2 and delete 1 IPs")
 }
 
@@ -144,7 +144,7 @@ func TestAPI_AddInWhiteList(t *testing.T) {
 	_, err := client.AddInWhiteList(context.Background(), &IPRequest{Ip: "127.0.0.1"})
 	assertNotErrorResult(t, err, "add in whitelist ip `127.0.0.1`")
 
-	cnt, err := api.whiteList.Count(context.Background())
+	cnt, err := api.WhiteList.Count(context.Background())
 	assertCountResult(t, 1, cnt, err, "count in whitelist after add ip `127.0.0.1`")
 }
 
@@ -161,7 +161,7 @@ func TestAPI_DeleteFromWhiteList(t *testing.T) {
 	_, err = client.DeleteFromWhiteList(context.Background(), &IPRequest{Ip: "127.0.0.1"})
 	assertNotErrorResult(t, err, "delete from whitelist ip `127.0.0.1`")
 
-	cnt, err := api.whiteList.Count(context.Background())
+	cnt, err := api.WhiteList.Count(context.Background())
 	assertCountResult(t, 1, cnt, err, "count in whitelist after one 2 and delete 1 IPs")
 }
 
@@ -169,13 +169,13 @@ func TestAPI_DeleteFromWhiteList(t *testing.T) {
 func TestAPI_ClearBucketForLogin(t *testing.T) {
 	api, client := runTestPipe(t)
 
-	err := api.loginBucketsStorage.Add(context.Background(), bucket.NewTokenBucketByLimitInMinute(10), "test")
+	err := api.LoginBucketsStorage.Add(context.Background(), bucket.NewTokenBucketByLimitInMinute(10), "test")
 	assertNotErrorResult(t, err, "add new bucket for login `test`")
 
 	_, err = client.ClearBucket(context.Background(), &BucketRequest{Login: "test"})
 	assertNotErrorResult(t, err, "delete bucket for login `test`")
 
-	cnt, err := api.loginBucketsStorage.Count(context.Background())
+	cnt, err := api.LoginBucketsStorage.Count(context.Background())
 	assertCountResult(t, 0, cnt, err, "count after delete bucket for login `test`")
 }
 
@@ -183,13 +183,13 @@ func TestAPI_ClearBucketForLogin(t *testing.T) {
 func TestAPI_ClearBucketForPassword(t *testing.T) {
 	api, client := runTestPipe(t)
 
-	err := api.passwordBucketsStorage.Add(context.Background(), bucket.NewTokenBucketByLimitInMinute(10), "1234")
+	err := api.PasswordBucketsStorage.Add(context.Background(), bucket.NewTokenBucketByLimitInMinute(10), "1234")
 	assertNotErrorResult(t, err, "add new bucket for password `1234`")
 
 	_, err = client.ClearBucket(context.Background(), &BucketRequest{Password: "1234"})
 	assertNotErrorResult(t, err, "delete bucket for password `1234`")
 
-	cnt, err := api.passwordBucketsStorage.Count(context.Background())
+	cnt, err := api.PasswordBucketsStorage.Count(context.Background())
 	assertCountResult(t, 0, cnt, err, "count after delete bucket for password `1234`")
 }
 
@@ -197,7 +197,7 @@ func TestAPI_ClearBucketForPassword(t *testing.T) {
 func TestAPI_ClearBucketForIP(t *testing.T) {
 	api, client := runTestPipe(t)
 
-	err := api.ipBucketsStorage.Add(
+	err := api.IPBucketsStorage.Add(
 		context.Background(),
 		bucket.NewTokenBucketByLimitInMinute(10),
 		entities.IP("127.0.0.1"),
@@ -207,7 +207,7 @@ func TestAPI_ClearBucketForIP(t *testing.T) {
 	_, err = client.ClearBucket(context.Background(), &BucketRequest{Ip: "127.0.0.1"})
 	assertNotErrorResult(t, err, "delete bucket for IP `127.0.0.1`")
 
-	cnt, err := api.ipBucketsStorage.Count(context.Background())
+	cnt, err := api.IPBucketsStorage.Count(context.Background())
 	assertCountResult(t, 0, cnt, err, "count after delete bucket for IP `127.0.0.1`")
 
 }
@@ -217,7 +217,7 @@ func TestAPI_AuthIPConformWhiteList(t *testing.T) {
 	api, client := runTestPipe(t)
 
 	// limit for ip bucket
-	api.ipBucketLimit = 1
+	api.IPBucketLimit = 1
 
 	ip := entities.IP("127.0.0.1")
 
@@ -246,7 +246,7 @@ func TestAPI_AuthIPConformWhiteList(t *testing.T) {
 func TestAPI_AuthIPConformWhiteList2(t *testing.T) {
 	api, client := runTestPipe(t)
 
-	api.ipBucketLimit = 1
+	api.IPBucketLimit = 1
 
 	ip := entities.IP("127.0.0.1")
 	subnetIP := entities.IP("127.0.0.0/24")
@@ -328,9 +328,9 @@ func TestApi_AuthIPConformBlackList2(t *testing.T) {
 func TestAPI_AuthOverflowLoginBucket(t *testing.T) {
 	api, client := runTestPipe(t)
 
-	api.loginBucketLimit = 1
-	api.passwordBucketLimit = 100
-	api.ipBucketLimit = 1000
+	api.LoginBucketLimit = 1
+	api.PasswordBucketLimit = 100
+	api.IPBucketLimit = 1000
 
 	ip := entities.IP("127.0.0.1")
 	login := "test"
@@ -368,9 +368,9 @@ func TestAPI_AuthNotOverflowLoginBucket(t *testing.T) {
 	api, client := runTestPipe(t)
 
 	// limit is 1 try in minute for each login
-	api.loginBucketLimit = 1
-	api.passwordBucketLimit = 100
-	api.ipBucketLimit = 1000
+	api.LoginBucketLimit = 1
+	api.PasswordBucketLimit = 100
+	api.IPBucketLimit = 1000
 
 	// deterministic timing
 	nowTime := time.Now()
@@ -407,9 +407,9 @@ func TestAPI_AuthNotOverflowLoginBucket(t *testing.T) {
 func TestAPI_AuthOverflowPasswordBucket(t *testing.T) {
 	api, client := runTestPipe(t)
 
-	api.loginBucketLimit = 10
-	api.passwordBucketLimit = 1 // limit 1 try in minute for each password
-	api.ipBucketLimit = 1000
+	api.LoginBucketLimit = 10
+	api.PasswordBucketLimit = 1 // limit 1 try in minute for each password
+	api.IPBucketLimit = 1000
 
 	ip := entities.IP("127.0.0.1")
 	password := "1234"
@@ -447,9 +447,9 @@ func TestAPI_AuthOverflowPasswordBucket(t *testing.T) {
 func TestAPI_AuthNotOverflowPasswordBucket(t *testing.T) {
 	api, client := runTestPipe(t)
 
-	api.loginBucketLimit = 10
-	api.passwordBucketLimit = 1 // limit 1 try in minute for each password
-	api.ipBucketLimit = 1000
+	api.LoginBucketLimit = 10
+	api.PasswordBucketLimit = 1 // limit 1 try in minute for each password
+	api.IPBucketLimit = 1000
 
 	// deterministic timing
 	nowTime := time.Now()
@@ -486,9 +486,9 @@ func TestAPI_AuthNotOverflowPasswordBucket(t *testing.T) {
 func TestAPI_AuthOverflowIPBucket(t *testing.T) {
 	api, client := runTestPipe(t)
 
-	api.loginBucketLimit = 10
-	api.passwordBucketLimit = 10
-	api.ipBucketLimit = 1 // limit 1 try in minute for each IP
+	api.LoginBucketLimit = 10
+	api.PasswordBucketLimit = 10
+	api.IPBucketLimit = 1 // limit 1 try in minute for each IP
 
 	ip := entities.IP("127.0.0.1")
 
@@ -525,9 +525,9 @@ func TestAPI_AuthOverflowIPBucket(t *testing.T) {
 func TestAPI_AuthNotOverflowIPBucket(t *testing.T) {
 	api, client := runTestPipe(t)
 
-	api.loginBucketLimit = 10
-	api.passwordBucketLimit = 10
-	api.ipBucketLimit = 1 // limit 1 try in minute for each IP
+	api.LoginBucketLimit = 10
+	api.PasswordBucketLimit = 10
+	api.IPBucketLimit = 1 // limit 1 try in minute for each IP
 
 	// deterministic timing
 	nowTime := time.Now()

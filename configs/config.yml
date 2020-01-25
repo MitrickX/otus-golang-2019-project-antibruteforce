@@ -1,0 +1,14 @@
+# limits in minutes for each login/password/ip
+limits:
+  login: 10
+  password: 100
+  ip: 1000
+
+logger:
+  level: "debug"
+  output_paths:
+    - stderr
+    - /tmp/calendar/outlog
+  error_output_paths:
+    - stderr
+    - /tmp/calendar/errlog
