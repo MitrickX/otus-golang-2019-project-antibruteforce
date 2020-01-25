@@ -4,16 +4,25 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"strconv"
 	"time"
+
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/storage/memory/ip"
+	"github.com/spf13/viper"
 
 	"google.golang.org/grpc/reflection"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
 
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/storage/memory/bucket"
+)
+
+const (
+	DefaultLoginBucketLimit    = 10
+	DefaultPasswordBucketLimit = 100
+	DefaultIPBucketLimit       = 1000
 )
 
 type API struct {
@@ -28,8 +37,28 @@ type API struct {
 	PasswordBucketLimit uint
 	IPBucketLimit       uint
 
-	Logger    *zap.SugaredLogger
 	nowTimeFn func() time.Time
+}
+
+func NewAPIByViper(v *viper.Viper) *API {
+	limits := v.GetStringMapString("limits")
+
+	loginBucketLimit := getIntFromStringMap(limits, "login", DefaultLoginBucketLimit)
+	passwordBucketLimit := getIntFromStringMap(limits, "password", DefaultPasswordBucketLimit)
+	ipBucketLimit := getIntFromStringMap(limits, "ip", DefaultIPBucketLimit)
+
+	api := &API{
+		BlackList:              ip.NewList(),
+		WhiteList:              ip.NewList(),
+		LoginBucketsStorage:    bucket.NewStorage(),
+		PasswordBucketsStorage: bucket.NewStorage(),
+		IPBucketsStorage:       bucket.NewStorage(),
+		LoginBucketLimit:       uint(loginBucketLimit),
+		PasswordBucketLimit:    uint(passwordBucketLimit),
+		IPBucketLimit:          uint(ipBucketLimit),
+	}
+
+	return api
 }
 
 func (a *API) Run(port string) error {
@@ -245,4 +274,16 @@ func deleteFromBucketStorage(ctx context.Context, storage entities.BucketStorage
 		return fmt.Errorf("error while deleting from %s bucket storage %s", name, err)
 	}
 	return nil
+}
+
+func getIntFromStringMap(m map[string]string, key string, defaultVal int) int {
+	val, ok := m[key]
+	if !ok {
+		return defaultVal
+	}
+	valInt, err := strconv.Atoi(val)
+	if err != nil {
+		return defaultVal
+	}
+	return valInt
 }

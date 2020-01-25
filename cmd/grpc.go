@@ -16,12 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"strconv"
-
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/logger"
 
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/storage/memory/bucket"
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/storage/memory/ip"
 	"github.com/spf13/viper"
 
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/grpc"
@@ -30,10 +26,7 @@ import (
 )
 
 const (
-	DefaultLoginBucketLimit    = 10
-	DefaultPasswordBucketLimit = 100
-	DefaultIPBucketLimit       = 1000
-	DefaultPort                = "50051"
+	DefaultPort = "50051"
 )
 
 // grpcCmd represents the grpc command
@@ -50,27 +43,6 @@ func init() {
 	rootCmd.AddCommand(grpcCmd)
 }
 
-func newAPI() *grpc.API {
-	limits := viper.GetStringMapString("limits")
-
-	loginBucketLimit := getIntFromStringMap(limits, "login", DefaultLoginBucketLimit)
-	passwordBucketLimit := getIntFromStringMap(limits, "password", DefaultPasswordBucketLimit)
-	ipBucketLimit := getIntFromStringMap(limits, "ip", DefaultIPBucketLimit)
-
-	api := &grpc.API{
-		BlackList:              ip.NewList(),
-		WhiteList:              ip.NewList(),
-		LoginBucketsStorage:    bucket.NewStorage(),
-		PasswordBucketsStorage: bucket.NewStorage(),
-		IPBucketsStorage:       bucket.NewStorage(),
-		LoginBucketLimit:       uint(loginBucketLimit),
-		PasswordBucketLimit:    uint(passwordBucketLimit),
-		IPBucketLimit:          uint(ipBucketLimit),
-	}
-
-	return api
-}
-
 func runGRPC() {
 	port := viper.GetString("GRPC_PORT")
 	if port == "" {
@@ -80,20 +52,8 @@ func runGRPC() {
 	l := logger.GetLogger()
 	l.Debugf("Run grpc service on port %s", port)
 
-	err := newAPI().Run(port)
+	err := grpc.NewAPIByViper(viper.GetViper()).Run(port)
 	if err != nil {
 		l.Error(err)
 	}
-}
-
-func getIntFromStringMap(m map[string]string, key string, defaultVal int) int {
-	val, ok := m[key]
-	if !ok {
-		return defaultVal
-	}
-	valInt, err := strconv.Atoi(val)
-	if err != nil {
-		return defaultVal
-	}
-	return valInt
 }
