@@ -61,7 +61,39 @@ func (t *featureTest) theErrorMustBe(expected string) error {
 	return nil
 }
 
+func (t *featureTest) listWithIp(kind string, ip string) error {
+
+	if kind != "black" && kind != "white" {
+		return fmt.Errorf("unexpected kind of list `%s`", kind)
+	}
+
+	ip = strings.TrimSpace(ip)
+
+	cfg := GetConfig()
+	apiClient := cfg.apiClient
+
+	request := &grpc.IPRequest{Ip: ip}
+
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
+	defer cancel()
+
+	var err error
+	if kind == "black" {
+		_, err = apiClient.AddInBlackList(ctx, request)
+	} else {
+		_, err = apiClient.AddInWhiteList(ctx, request)
+	}
+
+	if err != nil {
+		return fmt.Errorf("unexpected error when add ip %s in list", ip)
+	}
+
+	return nil
+}
+
 func FeatureContext(s *godog.Suite, t *featureTest) {
 	s.Step(`^I call method "([^"]*)" with params:$`, t.iCallMethodWithParams)
 	s.Step(`^The error must be "([^"]*)"$`, t.theErrorMustBe)
+	s.Step(`^"([^"]*)" list with ip="([^"]*)"$`, t.listWithIp)
+
 }

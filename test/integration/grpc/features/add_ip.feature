@@ -8,3 +8,10 @@ Feature: Add IP in black or white list
     ip=127.0.0.0/24
     """
     Then The error must be "nil"
+
+  Scenario: Add IP in white list
+    When I call method "AddInWhiteList" with params:
+    """
+    ip=127.0.0.0/24
+    """
+    Then The error must be "nil"

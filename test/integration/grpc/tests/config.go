@@ -3,7 +3,6 @@ package tests
 import (
 	"context"
 	"flag"
-	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -56,10 +55,6 @@ func init() {
 	} else if *featuresPath != "" {
 		cfg.RunnerPaths = append(cfg.RunnerPaths, *featuresPath)
 		log.Infof("run on features %", cfg.RunnerPaths)
-	}
-
-	for _, pair := range os.Environ() {
-		fmt.Println(pair)
 	}
 
 	host := os.Getenv("GRPC_SERVER_HOST")
