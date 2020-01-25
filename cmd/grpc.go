@@ -42,14 +42,7 @@ var grpcCmd = &cobra.Command{
 	Short: "Run grpc service",
 	Long:  `Run grpc service`,
 	Run: func(cmd *cobra.Command, args []string) {
-		port := viper.GetString("GRPC_PORT")
-		if port == "" {
-			port = DefaultPort
-		}
-		err := newAPI().Run(port)
-		if err != nil {
-			logger.GetLogger().Error(err)
-		}
+		runGRPC()
 	},
 }
 
@@ -76,6 +69,21 @@ func newAPI() *grpc.API {
 	}
 
 	return api
+}
+
+func runGRPC() {
+	port := viper.GetString("GRPC_PORT")
+	if port == "" {
+		port = DefaultPort
+	}
+
+	l := logger.GetLogger()
+	l.Debugf("Run grpc service on port %s", port)
+
+	err := newAPI().Run(port)
+	if err != nil {
+		l.Error(err)
+	}
 }
 
 func getIntFromStringMap(m map[string]string, key string, defaultVal int) int {
