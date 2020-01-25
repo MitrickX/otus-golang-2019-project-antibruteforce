@@ -3,6 +3,8 @@ package tests
 import (
 	"context"
 	"flag"
+	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -56,20 +58,26 @@ func init() {
 		log.Infof("run on features %", cfg.RunnerPaths)
 	}
 
-	host := v.GetString("GRPC_SERVER_HOST")
+	for _, pair := range os.Environ() {
+		fmt.Println(pair)
+	}
+
+	host := os.Getenv("GRPC_SERVER_HOST")
 	if host == "" {
 		log.Fatalf("env var `GRPC_SERVER_HOST` is required")
 	}
 
-	port := v.GetString("GRPC_SERVER_PORT")
+	port := os.Getenv("GRPC_SERVER_PORT")
 	if port == "" {
 		port = DefaultGRPCPort
 	}
 
 	addr := host + ":" + port
 
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	conn, err := grpc.DialContext(ctx, addr)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	conn, err := grpc.DialContext(ctx, addr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("establish connection with `%s` failed: %s", addr, err)
 	}

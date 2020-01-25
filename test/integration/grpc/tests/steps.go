@@ -25,7 +25,8 @@ func (t *featureTest) iCallMethodWithParams(methodName string, params *gherkin.D
 	cfg := GetConfig()
 	apiClient := cfg.apiClient
 
-	ctx, _ := context.WithTimeout(context.Background(), cfg.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
+	defer cancel()
 
 	replacer := strings.NewReplacer("\n", "", "\t", "")
 	query := replacer.Replace(params.Content)
