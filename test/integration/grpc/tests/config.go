@@ -3,6 +3,7 @@ package tests
 import (
 	"context"
 	"flag"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -14,12 +15,14 @@ import (
 )
 
 const (
-	DefaultGRPCPort = "50051"
+	DefaultGRPCPort    = "50051"
+	DefaultCfgFilePath = "../../../../configs/config.yml"
 )
 
 var cfg *Config
 
 type Config struct {
+	grpcAPI.LimitsConfig
 	apiClient   grpcAPI.ApiClient
 	timeout     time.Duration // timeout for context when call api methods
 	RunnerPaths []string
@@ -27,15 +30,30 @@ type Config struct {
 
 func init() {
 
-	v := viper.GetViper()
-
-	logger.InitLogger(v)
-	log := logger.GetLogger()
+	cfgPath := flag.String("config", "", `--config=<path>`)
 
 	features := flag.String("features", "", `-features="create_event,delete_event"`)
 	featuresPath := flag.String("features-path", "", `-features-path="./features/"`)
 
 	flag.Parse()
+
+	if *cfgPath == "" {
+		*cfgPath = DefaultCfgFilePath
+	}
+
+	viper.SetConfigFile(*cfgPath)
+
+	// If a logger file is found, read it in.
+	if err := viper.ReadInConfig(); err == nil {
+		log.Println("Using config file:", viper.ConfigFileUsed())
+	} else {
+		log.Fatal(err)
+	}
+
+	v := viper.GetViper()
+
+	logger.InitLogger(v)
+	l := logger.GetLogger()
 
 	cfg = &Config{}
 
@@ -51,15 +69,15 @@ func init() {
 		}
 		cfg.RunnerPaths = paths
 
-		log.Infof("run on features %s", paths)
+		l.Infof("run on features %s", paths)
 	} else if *featuresPath != "" {
 		cfg.RunnerPaths = append(cfg.RunnerPaths, *featuresPath)
-		log.Infof("run on features %", cfg.RunnerPaths)
+		l.Infof("run on features %", cfg.RunnerPaths)
 	}
 
 	host := os.Getenv("GRPC_SERVER_HOST")
 	if host == "" {
-		log.Fatalf("env var `GRPC_SERVER_HOST` is required")
+		l.Fatalf("env var `GRPC_SERVER_HOST` is required")
 	}
 
 	port := os.Getenv("GRPC_SERVER_PORT")
@@ -74,12 +92,13 @@ func init() {
 
 	conn, err := grpc.DialContext(ctx, addr, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("establish connection with `%s` failed: %s", addr, err)
+		l.Fatalf("establish connection with `%s` failed: %s", addr, err)
 	}
 
 	cfg.timeout = 3 * time.Second
 	cfg.apiClient = grpcAPI.NewApiClient(conn)
 
+	cfg.LimitsConfig = grpcAPI.NewLimitsConfigByViper(v)
 }
 
 func GetConfig() *Config {

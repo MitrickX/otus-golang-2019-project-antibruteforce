@@ -7,16 +7,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/storage/memory/bucket"
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/storage/memory/ip"
 	"github.com/spf13/viper"
-
-	"google.golang.org/grpc/reflection"
-
 	"google.golang.org/grpc"
-
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
-
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/storage/memory/bucket"
+	"google.golang.org/grpc/reflection"
 )
 
 const (
@@ -25,37 +21,55 @@ const (
 	DefaultIPBucketLimit       = 1000
 )
 
-type API struct {
+// Bucket limits config
+type LimitsConfig struct {
+	LoginLimit    uint
+	PasswordLimit uint
+	IPLimit       uint
+}
+
+func NewLimitsConfigByViper(v *viper.Viper) LimitsConfig {
+	limits := v.GetStringMapString("limits")
+	return LimitsConfig{
+		LoginLimit:    getUintFromStringMap(limits, "login", DefaultLoginBucketLimit),
+		PasswordLimit: getUintFromStringMap(limits, "password", DefaultPasswordBucketLimit),
+		IPLimit:       getUintFromStringMap(limits, "ip", DefaultIPBucketLimit),
+	}
+}
+
+// Set of buckets storages
+type StorageSet struct {
+	LoginStorage    entities.BucketStorage
+	PasswordStorage entities.BucketStorage
+	IPStorage       entities.BucketStorage
+}
+
+type ListSet struct {
 	BlackList entities.IPList
 	WhiteList entities.IPList
+}
 
-	LoginBucketsStorage    entities.BucketStorage
-	PasswordBucketsStorage entities.BucketStorage
-	IPBucketsStorage       entities.BucketStorage
-
-	LoginBucketLimit    uint
-	PasswordBucketLimit uint
-	IPBucketLimit       uint
-
+// GRPC API struct
+type API struct {
+	LimitsConfig
+	StorageSet
+	ListSet
 	nowTimeFn func() time.Time
 }
 
 func NewAPIByViper(v *viper.Viper) *API {
-	limits := v.GetStringMapString("limits")
-
-	loginBucketLimit := getIntFromStringMap(limits, "login", DefaultLoginBucketLimit)
-	passwordBucketLimit := getIntFromStringMap(limits, "password", DefaultPasswordBucketLimit)
-	ipBucketLimit := getIntFromStringMap(limits, "ip", DefaultIPBucketLimit)
 
 	api := &API{
-		BlackList:              ip.NewList(),
-		WhiteList:              ip.NewList(),
-		LoginBucketsStorage:    bucket.NewStorage(),
-		PasswordBucketsStorage: bucket.NewStorage(),
-		IPBucketsStorage:       bucket.NewStorage(),
-		LoginBucketLimit:       uint(loginBucketLimit),
-		PasswordBucketLimit:    uint(passwordBucketLimit),
-		IPBucketLimit:          uint(ipBucketLimit),
+		LimitsConfig: NewLimitsConfigByViper(v),
+		StorageSet: StorageSet{
+			LoginStorage:    bucket.NewStorage(),
+			PasswordStorage: bucket.NewStorage(),
+			IPStorage:       bucket.NewStorage(),
+		},
+		ListSet: ListSet{
+			BlackList: ip.NewList(),
+			WhiteList: ip.NewList(),
+		},
 	}
 
 	return api
@@ -115,17 +129,17 @@ func (a *API) DeleteFromWhiteList(ctx context.Context, request *IPRequest) (*Non
 func (a *API) ClearBucket(ctx context.Context, request *BucketRequest) (*None, error) {
 	var err error
 
-	err = deleteFromBucketStorage(ctx, a.LoginBucketsStorage, request.Login, "login")
+	err = deleteFromBucketStorage(ctx, a.LoginStorage, request.Login, "login")
 	if err != nil {
 		return nil, err
 	}
 
-	err = deleteFromBucketStorage(ctx, a.PasswordBucketsStorage, request.Password, "password")
+	err = deleteFromBucketStorage(ctx, a.PasswordStorage, request.Password, "password")
 	if err != nil {
 		return nil, err
 	}
 
-	err = deleteFromBucketStorage(ctx, a.IPBucketsStorage, entities.IP(request.Ip), "ip")
+	err = deleteFromBucketStorage(ctx, a.IPStorage, entities.IP(request.Ip), "ip")
 	if err != nil {
 		return nil, err
 	}
@@ -228,15 +242,15 @@ func (a *API) isConformByLoginBucket(ctx context.Context, login string) (bool, e
 }
 
 func (a *API) getIPBucket(ctx context.Context, ip entities.IP) (entities.Bucket, error) {
-	return getBucketFromStorage(ctx, a.IPBucketsStorage, ip, a.IPBucketLimit)
+	return getBucketFromStorage(ctx, a.IPStorage, ip, a.IPLimit)
 }
 
 func (a *API) getPasswordBucket(ctx context.Context, password string) (entities.Bucket, error) {
-	return getBucketFromStorage(ctx, a.PasswordBucketsStorage, password, a.PasswordBucketLimit)
+	return getBucketFromStorage(ctx, a.PasswordStorage, password, a.PasswordLimit)
 }
 
 func (a *API) getLoginBucket(ctx context.Context, login string) (entities.Bucket, error) {
-	return getBucketFromStorage(ctx, a.LoginBucketsStorage, login, a.LoginBucketLimit)
+	return getBucketFromStorage(ctx, a.LoginStorage, login, a.LoginLimit)
 }
 
 func (a *API) now() time.Time {
@@ -276,7 +290,7 @@ func deleteFromBucketStorage(ctx context.Context, storage entities.BucketStorage
 	return nil
 }
 
-func getIntFromStringMap(m map[string]string, key string, defaultVal int) int {
+func getUintFromStringMap(m map[string]string, key string, defaultVal uint) uint {
 	val, ok := m[key]
 	if !ok {
 		return defaultVal
@@ -285,5 +299,5 @@ func getIntFromStringMap(m map[string]string, key string, defaultVal int) int {
 	if err != nil {
 		return defaultVal
 	}
-	return valInt
+	return uint(valInt)
 }
