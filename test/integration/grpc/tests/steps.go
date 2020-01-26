@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/DATA-DOG/godog/gherkin"
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/grpc"
@@ -244,6 +245,11 @@ func (t *featureTest) cleanList(kind string) error {
 	return nil
 }
 
+func (t *featureTest) waitMinute(n int) error {
+	time.Sleep(time.Duration(n) * time.Minute)
+	return nil
+}
+
 func FeatureContext(s *godog.Suite, t *featureTest) {
 	s.Step(`^Clean bucket for$`, t.cleanBucketFor)
 	s.Step(`^Clean "([^"]*)" list$`, t.cleanList)
@@ -253,4 +259,5 @@ func FeatureContext(s *godog.Suite, t *featureTest) {
 	s.Step(`^"([^"]*)" list with ip="([^"]*)"$`, t.listWithIp)
 	s.Step(`^bucket for$`, t.bucketFor)
 	s.Step(`^The result must be "([^"]*)"$`, t.theResultMustBe)
+	s.Step(`^Wait (\d+) minute$`, t.waitMinute)
 }
