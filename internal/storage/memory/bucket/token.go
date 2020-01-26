@@ -1,12 +1,9 @@
 package bucket
 
 import (
-	"fmt"
 	"sync"
 	"time"
 )
-
-const DEBUG = false
 
 type TokenBucket struct {
 	count    uint          // count of tokens in bucket
@@ -17,9 +14,6 @@ type TokenBucket struct {
 }
 
 func NewTokenBucket(limit uint, duration time.Duration) *TokenBucket {
-	if DEBUG {
-		fmt.Printf("limit=%d,duration=%s\n", limit, duration)
-	}
 	return &TokenBucket{
 		count:    limit,
 		duration: duration,
@@ -35,10 +29,6 @@ func NewTokenBucketByLimitInMinute(limit uint) *TokenBucket {
 func (b *TokenBucket) IsConform(t time.Time) bool {
 	b.mx.Lock()
 	defer b.mx.Unlock()
-
-	if DEBUG {
-		fmt.Printf("count=%d\n", b.count)
-	}
 
 	if b.count == 0 {
 		b.releaseTokens(t)
@@ -62,19 +52,12 @@ func (b *TokenBucket) releaseTokens(t time.Time) {
 		elapsed = 0
 	}
 
-	if DEBUG {
-		fmt.Printf("elapsed=%d\n", elapsed)
-	}
-
 	releaseCount := uint(elapsed / int64(b.duration))
+
 	missingCount := b.limit - b.count
 	if releaseCount > missingCount {
 		releaseCount = missingCount // to prevent overflow limit of bucket
 	}
 
 	b.count += releaseCount
-
-	if DEBUG {
-		fmt.Printf("releaseCount=%d,count=%d\n", elapsed, b.count)
-	}
 }

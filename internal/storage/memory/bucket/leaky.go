@@ -1,7 +1,6 @@
 package bucket
 
 import (
-	"fmt"
 	"sync"
 	"time"
 )
@@ -15,9 +14,6 @@ type LeakyBucket struct {
 }
 
 func NewLeakyBucket(increment time.Duration, limit time.Duration) *LeakyBucket {
-	if DEBUG {
-		fmt.Printf("I=%s,L=%s\n", increment, limit)
-	}
 	return &LeakyBucket{increment: increment, limit: limit, lct: -1}
 }
 
@@ -32,19 +28,9 @@ func (b *LeakyBucket) IsConform(t time.Time) bool {
 
 	ta := t.UnixNano()
 
-	if DEBUG {
-		fmt.Printf("\nX=%s, LCT=%s, T=%s\n", b.content, time.Duration(b.lct), time.Duration(ta))
-		fmt.Printf("T-LCT=%s\n", time.Duration(ta-b.lct))
-	}
-
 	auxiliary := b.content - time.Duration(ta-b.lct) // X' = X - (ta - LCT)
 	if auxiliary <= 0 {
 		auxiliary = 0
-	}
-
-	if DEBUG {
-		fmt.Printf("X'=%s,X'+I=%s\n", auxiliary, auxiliary+b.increment)
-		fmt.Printf("X' > L? %t\n", auxiliary > b.limit)
 	}
 
 	if auxiliary > b.limit { // X' > L?
