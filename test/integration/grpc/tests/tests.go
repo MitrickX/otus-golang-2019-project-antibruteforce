@@ -5,14 +5,20 @@ package tests
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/DATA-DOG/godog/gherkin"
 	grpcAPI "github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/grpc"
 	"google.golang.org/grpc"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 type ipListMethod func(context.Context, *grpcAPI.IPRequest, ...grpc.CallOption) (*grpcAPI.None, error)
 
@@ -29,11 +35,21 @@ func docStringToAuthRequest(params *gherkin.DocString) (*grpcAPI.AuthRequest, er
 		return nil, fmt.Errorf("parse params failed: %s", err)
 	}
 
-	return &grpcAPI.AuthRequest{
+	request := &grpcAPI.AuthRequest{
 		Login:    p.Get("login"),
 		Password: p.Get("password"),
 		Ip:       p.Get("ip"),
-	}, nil
+	}
+
+	if request.Login == "random" {
+		request.Login = "l" + strconv.Itoa(rand.Int())
+	}
+
+	if request.Password == "random" {
+		request.Password = "p" + strconv.Itoa(rand.Int())
+	}
+
+	return request, nil
 }
 
 func docStringToIPRequest(param *gherkin.DocString) (*grpcAPI.IPRequest, error) {

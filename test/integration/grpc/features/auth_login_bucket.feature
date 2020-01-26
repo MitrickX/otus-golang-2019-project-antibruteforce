@@ -13,7 +13,7 @@ Feature: Auth
     # N auth tries, must be ok. N is limit for login bucket
     When I call "loginLimit" times method "Auth" with params:
     """
-    login=test&ip=127.0.0.1
+    login=test&password=random&ip=127.0.0.1
     """
     Then The error must be "nil"
     And The result must be "true"
@@ -21,7 +21,7 @@ Feature: Auth
     # N + 1 auth try with same login, must be not ok cause of overflowing
     When I call method "Auth" with params:
     """
-    login=test&ip=127.0.0.1
+    login=test&password=random&ip=127.0.0.1
     """
     Then The error must be "nil"
     And The result must be "false"
@@ -29,7 +29,7 @@ Feature: Auth
     # 1 auth try for different login, must be ok cause new login - new bucket
     When I call method "Auth" with params:
     """
-    login=test2&ip=127.0.0.1
+    login=test2&password=random&ip=127.0.0.1
     """
     Then The error must be "nil"
     And The result must be "true"
@@ -45,7 +45,7 @@ Feature: Auth
     # N auth tries, must be ok. N is limit for login bucket
     When I call "loginLimit" times method "Auth" with params:
     """
-    login=test&ip=127.0.0.1
+    login=test&password=random&ip=127.0.0.1
     """
     Then The error must be "nil"
     And The result must be "true"
@@ -56,7 +56,7 @@ Feature: Auth
     # N auth tries, must be ok. N is limit for login bucket
     And I call "loginLimit" times method "Auth" with params:
     """
-    login=test&ip=127.0.0.1
+    login=test&password=random&ip=127.0.0.1
     """
     Then The error must be "nil"
     And The result must be "true"
