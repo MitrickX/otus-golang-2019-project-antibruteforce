@@ -14,8 +14,7 @@ services:
     build:
       context: ../..
       dockerfile: ./build/package/Dockerfile-tests
-    # command: ./tests --config ./configs/config.yaml --features-path ./features/
-    command: ./tests --features-path ./features/
+    # command: ./tests --config ./configs/config.yml --features-path ./features/
     environment:
       - GRPC_SERVER_HOST=grpc
       - GRPC_SERVER_PORT=50051
