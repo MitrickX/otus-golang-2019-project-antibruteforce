@@ -1,3 +1,5 @@
+// +build !unit
+
 package tests
 
 import (
@@ -30,12 +32,23 @@ type Config struct {
 
 func init() {
 
-	cfgPath := flag.String("config", "", `--config=<path>`)
+	cfg = &Config{}
 
-	features := flag.String("features", "", `-features="create_event,delete_event"`)
-	featuresPath := flag.String("features-path", "", `-features-path="./features/"`)
+	fs := flag.NewFlagSet("integraion tests", flag.ContinueOnError)
 
-	flag.Parse()
+	// where is config
+	cfgPath := fs.String("config", "", `--config=<path>`)
+
+	// what features to test
+	features := fs.String("features", "", `--features="create_event,delete_event"`)
+
+	// where is features
+	featuresPath := fs.String("features-path", "", `--features-path="./features/"`)
+
+	err := fs.Parse(os.Args[1:])
+	if err != nil {
+		log.Printf("Parse arguments error %s", err)
+	}
 
 	if *cfgPath == "" {
 		*cfgPath = DefaultCfgFilePath
@@ -54,8 +67,6 @@ func init() {
 
 	logger.InitLogger(v)
 	l := logger.GetLogger()
-
-	cfg = &Config{}
 
 	if *features != "" {
 		featureList := strings.Split(*features, ",")

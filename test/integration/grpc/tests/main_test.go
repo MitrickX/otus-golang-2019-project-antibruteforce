@@ -1,3 +1,5 @@
+// +build !unit
+
 package tests
 
 import (
@@ -16,6 +18,7 @@ var runnerOptions = godog.Options{
 
 // Test entry point
 func TestMain(m *testing.M) {
+
 	config := GetConfig()
 
 	if len(config.RunnerPaths) > 0 {
