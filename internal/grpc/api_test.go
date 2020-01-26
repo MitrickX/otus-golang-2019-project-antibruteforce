@@ -299,7 +299,7 @@ func TestApi_AuthIPConformBlackList1(t *testing.T) {
 	assertOkResponse(t, false, response, err, "2nd auth of ip `127.0.0.1`")
 }
 
-// Test auth when ip conform black list, because there is subnet ip in white list that conform this ip
+// Test auth when ip conform black list, because there is subnet ip in black list that conform this ip
 func TestApi_AuthIPConformBlackList2(t *testing.T) {
 	_, client := runTestPipe(t)
 
