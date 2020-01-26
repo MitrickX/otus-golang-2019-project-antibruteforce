@@ -129,6 +129,26 @@ func TestList_Count(t *testing.T) {
 
 }
 
+func TestList_Clear(t *testing.T) {
+	list := NewList()
+
+	var cnt int
+	var err error
+
+	cnt, err = list.Count(context.Background())
+	assertCountResult(t, 0, cnt, err, "count")
+
+	err = list.Add(context.Background(), entities.IP("127.0.0.1"))
+	assertNotErrorResult(t, err, "add ip `127.0.0.1`")
+
+	err = list.Clear(context.Background())
+	assertNotErrorResult(t, err, "clear list")
+
+	cnt, err = list.Count(context.Background())
+	assertCountResult(t, 0, cnt, err, "count")
+
+}
+
 func assertNotErrorResult(t *testing.T, err error, prefix string) {
 	if err != nil {
 		t.Fatalf("%s: unexpected error %s", prefix, err)

@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"strconv"
@@ -91,8 +92,11 @@ func (a *API) Run(port string) error {
 }
 
 func (a *API) AddInBlackList(ctx context.Context, request *IPRequest) (*None, error) {
-	ip := entities.IP(request.Ip)
-	err := a.BlackList.Add(ctx, ip)
+	ip, err := entities.New(request.Ip)
+	if err != nil {
+		return nil, err
+	}
+	err = a.BlackList.Add(ctx, ip)
 	if err != nil {
 		return nil, err
 	}
@@ -100,8 +104,11 @@ func (a *API) AddInBlackList(ctx context.Context, request *IPRequest) (*None, er
 }
 
 func (a *API) AddInWhiteList(ctx context.Context, request *IPRequest) (*None, error) {
-	ip := entities.IP(request.Ip)
-	err := a.WhiteList.Add(ctx, ip)
+	ip, err := entities.New(request.Ip)
+	if err != nil {
+		return nil, err
+	}
+	err = a.WhiteList.Add(ctx, ip)
 	if err != nil {
 		return nil, err
 	}
@@ -109,8 +116,11 @@ func (a *API) AddInWhiteList(ctx context.Context, request *IPRequest) (*None, er
 }
 
 func (a *API) DeleteFromBlackList(ctx context.Context, request *IPRequest) (*None, error) {
-	ip := entities.IP(request.Ip)
-	err := a.BlackList.Delete(ctx, ip)
+	ip, err := entities.New(request.Ip)
+	if err != nil {
+		return nil, err
+	}
+	err = a.BlackList.Delete(ctx, ip)
 	if err != nil {
 		return nil, err
 	}
@@ -118,8 +128,11 @@ func (a *API) DeleteFromBlackList(ctx context.Context, request *IPRequest) (*Non
 }
 
 func (a *API) DeleteFromWhiteList(ctx context.Context, request *IPRequest) (*None, error) {
-	ip := entities.IP(request.Ip)
-	err := a.WhiteList.Delete(ctx, ip)
+	ip, err := entities.New(request.Ip)
+	if err != nil {
+		return nil, err
+	}
+	err = a.WhiteList.Delete(ctx, ip)
 	if err != nil {
 		return nil, err
 	}
@@ -129,44 +142,64 @@ func (a *API) DeleteFromWhiteList(ctx context.Context, request *IPRequest) (*Non
 func (a *API) ClearBucket(ctx context.Context, request *BucketRequest) (*None, error) {
 	var err error
 
-	err = deleteFromBucketStorage(ctx, a.LoginStorage, request.Login, "login")
-	if err != nil {
-		return nil, err
+	if request.Login != "" {
+		err = deleteFromBucketStorage(ctx, a.LoginStorage, request.Login, "login")
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	err = deleteFromBucketStorage(ctx, a.PasswordStorage, request.Password, "password")
-	if err != nil {
-		return nil, err
+	if request.Password != "" {
+		err = deleteFromBucketStorage(ctx, a.PasswordStorage, request.Password, "password")
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	err = deleteFromBucketStorage(ctx, a.IPStorage, entities.IP(request.Ip), "ip")
-	if err != nil {
-		return nil, err
+	if request.Ip != "" {
+		ip, err := entities.New(request.Ip)
+		if err != nil {
+			return nil, err
+		}
+		err = deleteFromBucketStorage(ctx, a.IPStorage, ip, "ip")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &None{}, nil
 }
 
 func (a *API) Auth(ctx context.Context, request *AuthRequest) (*OkResponse, error) {
-	ip := entities.IP(request.Ip)
-
 	var err error
-	var conform bool
 
-	conform, err = a.isConformByWhiteList(ctx, ip)
+	if request.Ip == "" {
+		return nil, errors.New("ip is required for Auth method")
+	}
+
+	ip, err := entities.NewWithoutMaskPart(request.Ip)
 	if err != nil {
 		return nil, err
 	}
-	if conform {
-		return &OkResponse{Ok: true}, nil
-	}
 
+	var conform bool
+
+	// if ip conform black list - no auth (even if ip conform white list)
 	conform, err = a.isConformByBlackList(ctx, ip)
 	if err != nil {
 		return nil, err
 	}
 	if conform {
 		return &OkResponse{Ok: false}, nil
+	}
+
+	// if ip conform white list - auth is ok
+	conform, err = a.isConformByWhiteList(ctx, ip)
+	if err != nil {
+		return nil, err
+	}
+	if conform {
+		return &OkResponse{Ok: true}, nil
 	}
 
 	conform, err = a.isConformByIPBucket(ctx, ip)
@@ -189,12 +222,24 @@ func (a *API) Auth(ctx context.Context, request *AuthRequest) (*OkResponse, erro
 	if err != nil {
 		return nil, err
 	}
-	if !conform {
-		return &OkResponse{Ok: false}, nil
+
+	return &OkResponse{Ok: conform}, nil
+}
+
+func (a *API) ClearBlackList(ctx context.Context, _ *None) (*None, error) {
+	err := a.BlackList.Clear(ctx)
+	if err != nil {
+		return nil, err
 	}
+	return &None{}, nil
+}
 
-	return &OkResponse{Ok: true}, nil
-
+func (a *API) ClearWhiteList(ctx context.Context, _ *None) (*None, error) {
+	err := a.WhiteList.Clear(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &None{}, nil
 }
 
 func (a *API) isConformByWhiteList(ctx context.Context, ip entities.IP) (bool, error) {

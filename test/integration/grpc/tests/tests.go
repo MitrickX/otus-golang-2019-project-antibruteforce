@@ -36,9 +36,14 @@ func docStringToAuthRequest(params *gherkin.DocString) (*grpcAPI.AuthRequest, er
 	}, nil
 }
 
-func docStringToIPRequest(param *gherkin.DocString) *grpcAPI.IPRequest {
+func docStringToIPRequest(param *gherkin.DocString) (*grpcAPI.IPRequest, error) {
 	query := docStringToString(param)
-	return &grpcAPI.IPRequest{Ip: query}
+	p, err := url.ParseQuery(query)
+	if err != nil {
+		return nil, fmt.Errorf("parse params failed: %s", err)
+	}
+
+	return &grpcAPI.IPRequest{Ip: p.Get("ip")}, nil
 }
 
 func docStringToBucketRequest(params *gherkin.DocString) (*grpcAPI.BucketRequest, error) {

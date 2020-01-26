@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/url"
 	"strings"
 
 	"github.com/DATA-DOG/godog/gherkin"
@@ -50,7 +49,13 @@ func (t *featureTest) iCallIntTimesMethodWithParams(times int, methodName string
 		if method == nil {
 			return fmt.Errorf("coudn't find grpc method by name %s", methodName)
 		}
-		_, err := method(ctx, docStringToIPRequest(params))
+
+		request, err := docStringToIPRequest(params)
+		if err != nil {
+			return fmt.Errorf("couldn't convert input params to ip request %s", err)
+		}
+
+		_, err = method(ctx, request)
 		t.responseErrors = []error{err}
 		return nil
 	}
@@ -117,25 +122,24 @@ func (t *featureTest) listWithIp(kind string, ip string) error {
 
 func (t *featureTest) bucketFor(params *gherkin.DocString) error {
 
-	query := docStringToString(params)
-
-	p, err := url.ParseQuery(query)
-	if err != nil {
-		return fmt.Errorf("parse params failed: %s", err)
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
+	defer cancel()
 
 	cfg := GetConfig()
 	apiClient := cfg.apiClient
 
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
-	defer cancel()
+	request, err := docStringToAuthRequest(params)
+	if err != nil {
+		return fmt.Errorf("couldn't convert input params to auth request %s", err)
+	}
 
 	// we call auth so bucket will be created
-	request := &grpc.AuthRequest{
-		Login:    p.Get("login"),
-		Password: p.Get("password"),
-		Ip:       p.Get("ip"),
+
+	// Ip must not be empty, cause it is required for auth
+	if request.Ip == "" {
+		request.Ip = "127.0.0.1"
 	}
+
 	response, err := apiClient.Auth(ctx, request)
 
 	if err != nil {
@@ -199,7 +203,50 @@ func (t *featureTest) theResultMustBe(expected string) error {
 	return nil
 }
 
+func (t *featureTest) cleanBucketFor(params *gherkin.DocString) error {
+
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
+	defer cancel()
+
+	request, err := docStringToBucketRequest(params)
+	if err != nil {
+		return fmt.Errorf("couldn't convert input params to bucket request %s", err)
+	}
+
+	_, err = GetConfig().apiClient.ClearBucket(ctx, request)
+
+	if err != nil {
+		return fmt.Errorf("unexpected error when call clear bucket %s", err)
+	}
+
+	return nil
+}
+
+func (t *featureTest) cleanList(kind string) error {
+	if kind != "black" && kind != "white" {
+		return fmt.Errorf("unexpected kind of list `%s`", kind)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
+	defer cancel()
+
+	var err error
+	if kind == "black" {
+		_, err = GetConfig().apiClient.ClearBlackList(ctx, &grpc.None{})
+	} else {
+		_, err = GetConfig().apiClient.ClearWhiteList(ctx, &grpc.None{})
+	}
+
+	if err != nil {
+		return fmt.Errorf("unexpected erorr when clear %s list %s", kind, err)
+	}
+
+	return nil
+}
+
 func FeatureContext(s *godog.Suite, t *featureTest) {
+	s.Step(`^Clean bucket for$`, t.cleanBucketFor)
+	s.Step(`^Clean "([^"]*)" list$`, t.cleanList)
 	s.Step(`^I call method "([^"]*)" with params:$`, t.iCallMethodWithParams)
 	s.Step(`^I call "([^"]*)" times method "([^"]*)" with params:$`, t.iCallTimesMethodWithParams)
 	s.Step(`^The error must be "([^"]*)"$`, t.theErrorMustBe)

@@ -4,7 +4,6 @@ package grpc;
 
 // protoc --go_out=plugins=grpc:./../internal/grpc api.proto
 
-
 message None {}
 
 message AuthRequest {
@@ -34,4 +33,8 @@ service Api {
     rpc DeleteFromWhiteList (IPRequest) returns (None) {};
     rpc ClearBucket(BucketRequest)      returns (None) {};
     rpc Auth(AuthRequest)               returns (OkResponse) {};
+
+    // For integration tests when need clean lists before run tests
+    rpc ClearBlackList(None)                returns (None) {};
+    rpc ClearWhiteList(None)                returns (None) {};
 }
