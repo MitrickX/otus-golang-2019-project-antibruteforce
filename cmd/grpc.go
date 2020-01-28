@@ -16,44 +16,94 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
+	"os"
+	"time"
+
+	grpcAPI "github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/grpc"
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/logger"
-
-	"github.com/spf13/viper"
-
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/grpc"
-
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"google.golang.org/grpc"
 )
 
 const (
-	DefaultPort = "50051"
+	DefaultGRPCPort = "50051"
 )
 
-// grpcCmd represents the grpc command
+// grpcCmd represents the grpcAPI command
 var grpcCmd = &cobra.Command{
 	Use:   "grpc",
 	Short: "Run grpc service",
 	Long:  `Run grpc service`,
 	Run: func(cmd *cobra.Command, args []string) {
-		runGRPC()
+		runGRPCServer()
 	},
 }
+
+// grpc client for client commands add, delete, clear, auth
+type GRPCClientConfig struct {
+	addr      string
+	timeout   time.Duration
+	apiClient grpcAPI.ApiClient
+}
+
+var grpcClientConfig *GRPCClientConfig
 
 func init() {
 	rootCmd.AddCommand(grpcCmd)
 }
 
-func runGRPC() {
+func runGRPCServer() {
 	port := viper.GetString("GRPC_PORT")
 	if port == "" {
-		port = DefaultPort
+		port = DefaultGRPCPort
 	}
 
 	l := logger.GetLogger()
-	l.Debugf("Run grpc service on port %s", port)
+	l.Debugf("Run grpcAPI service on port %s", port)
 
-	err := grpc.NewAPIByViper(viper.GetViper()).Run(port)
+	err := grpcAPI.NewAPIByViper(viper.GetViper()).Run(port)
 	if err != nil {
 		l.Error(err)
 	}
+}
+
+func getGRPCClientConfig() *GRPCClientConfig {
+	if grpcClientConfig != nil {
+		return grpcClientConfig
+	}
+
+	// first init
+
+	l := logger.GetLogger()
+
+	host := os.Getenv("GRPC_SERVER_HOST")
+	if host == "" {
+		l.Fatalf("env var `GRPC_SERVER_HOST` is required")
+	}
+
+	port := os.Getenv("GRPC_SERVER_PORT")
+	if port == "" {
+		port = DefaultGRPCPort
+	}
+
+	addr := host + ":" + port
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	conn, err := grpc.DialContext(ctx, addr, grpc.WithInsecure())
+	if err != nil {
+		l.Fatalf("establish connection with `%s` failed: %s", addr, err)
+	}
+
+	grpcClientConfig = &GRPCClientConfig{
+		addr:      addr,
+		timeout:   3 * time.Second,
+		apiClient: grpcAPI.NewApiClient(conn),
+	}
+
+	return grpcClientConfig
+
 }
