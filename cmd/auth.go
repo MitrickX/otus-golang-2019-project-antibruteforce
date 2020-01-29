@@ -16,37 +16,79 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
+	"errors"
 	"fmt"
+
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/grpc"
+
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
 
 	"github.com/spf13/cobra"
 )
 
 // authCmd represents the auth command
 var authCmd = &cobra.Command{
-	Use:   "auth",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "auth <login> <password> <ip> [flags]",
+	Short: "Auth",
+	Long: `Check that auth is allowed for login, password and ip
+All arguments are required
+IP should be of host
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+See examples below:
+	auth test 1234 193.70.18.123 - check that auth is allowed for login=test, password=1234 and ip=192.70.18.123
+`,
+	DisableFlagsInUseLine: true,
+	Args: func(cmd *cobra.Command, args []string) error {
+		return validateAuthCmdArgs(args)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(args)
-		fmt.Println("auth called")
+		runAuthCommand(args[0], args[1], args[2])
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(authCmd)
+}
 
-	// Here you will define your flags and configuration settings.
+func validateAuthCmdArgs(args []string) error {
+	if len(args) < 1 {
+		return errors.New("<login>, <password> and <ip> is required. Run with --help for more information")
+	}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// authCmd.PersistentFlags().String("foo", "", "A help for foo")
+	if len(args) < 2 {
+		return errors.New("<password> and <ip> is required. Run with --help for more information")
+	}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// authCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	if len(args) < 3 {
+		return errors.New("<ip> is required. Run with --help for more information")
+	}
+
+	_, err := entities.NewWithoutMaskPart(args[2])
+	if err != nil {
+		return fmt.Errorf("%s. Run with --help for more information", err)
+	}
+
+	return nil
+}
+
+func runAuthCommand(login, password, ip string) {
+	cfg := getGRPCClientConfig()
+
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
+	defer cancel()
+
+	result, err := cfg.apiClient.Auth(ctx, &grpc.AuthRequest{
+		Login:    login,
+		Password: password,
+		Ip:       ip,
+	})
+
+	if err != nil {
+		fmt.Printf("FAIL: %s\n", err)
+	} else if result.Ok {
+		fmt.Printf("OK: auth for login=%s, password=%s, ip=%s is allowed\n", login, password, ip)
+	} else {
+		fmt.Printf("NOT OK: auth for login=%s, password=%s, ip=%s is NOT allowed\n", login, password, ip)
+	}
 }
