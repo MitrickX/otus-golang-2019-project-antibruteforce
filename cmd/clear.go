@@ -31,7 +31,7 @@ import (
 var clearCmd = &cobra.Command{
 	Use:   "clear",
 	Short: "Clear bucket",
-	Long: `Clear bucket for login or/and password or/and ip. 
+	Long: `Clear bucket for login, password or ip. 
 IP should be of host
 
 See examples below:
