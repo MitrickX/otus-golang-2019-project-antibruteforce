@@ -21,39 +21,40 @@ import (
 
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/grpc"
+
 	"github.com/spf13/cobra"
 )
 
-// addCmd represents the add command
-var addCmd = &cobra.Command{
-	Use:   "add <kind> <ip> [flags]",
-	Short: "Add IP into black or white list",
-	Long: `Add IP into black or white list. 
+// deleteCmd represents the delete command
+var deleteCmd = &cobra.Command{
+	Use:   "delete <kind> <ip> [flags]",
+	Short: "Delete IP from black or white list",
+	Long: `Delete IP from black or white list. 
 IP could be as of host or as of subnet
 
 <kind> = black | white
 <ip> = host IP or subnet IP in CIDR notation
 
 See examples below:
-	add black 193.70.18.0/24	- add subnet IP into black list 
-	add black 193.70.18.123		- add host IP into black list
-	add white 192.70.18.0/24	- add subnet IP into white list
-	add white 192.70.18.123		- add host IP into white list
+	delete black 193.70.18.0/24	- delete subnet IP from black list 
+	delete black 193.70.18.123	- delete host IP from black list
+	delete white 192.70.18.0/24	- delete subnet IP from white list
+	delete white 192.70.18.123	- delete host IP from white list
 `,
 	DisableFlagsInUseLine: true,
 	Args: func(cmd *cobra.Command, args []string) error {
 		return validateListCmdArgs(args)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		runAddCommand(args[0], entities.IP(args[1]))
+		runDeleteCommand(args[0], entities.IP(args[1]))
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(addCmd)
+	rootCmd.AddCommand(deleteCmd)
 }
 
-func runAddCommand(kind string, ip entities.IP) {
+func runDeleteCommand(kind string, ip entities.IP) {
 	cfg := getGRPCClientConfig()
 
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
@@ -62,14 +63,14 @@ func runAddCommand(kind string, ip entities.IP) {
 	var err error
 
 	if kind == "black" {
-		_, err = cfg.apiClient.AddInBlackList(ctx, &grpc.IPRequest{Ip: string(ip)})
+		_, err = cfg.apiClient.DeleteFromBlackList(ctx, &grpc.IPRequest{Ip: string(ip)})
 	} else {
-		_, err = cfg.apiClient.AddInBlackList(ctx, &grpc.IPRequest{Ip: string(ip)})
+		_, err = cfg.apiClient.DeleteFromBlackList(ctx, &grpc.IPRequest{Ip: string(ip)})
 	}
 
 	if err != nil {
 		fmt.Printf("FAIL: %s\n", err)
 	} else {
-		fmt.Printf("OK: %s added in %s list\n", ip, kind)
+		fmt.Printf("OK: %s delete in %s list\n", ip, kind)
 	}
 }

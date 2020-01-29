@@ -16,8 +16,11 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
+
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
 
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/logger"
 	"github.com/spf13/cobra"
@@ -98,4 +101,26 @@ func initConfig() {
 
 func initLogger() {
 	logger.InitLogger(viper.GetViper())
+}
+
+// Validate cmd args for list commands: add, delete
+func validateListCmdArgs(args []string) error {
+	if len(args) < 1 {
+		return errors.New("<kind> and <ip> is required. Run with --help for more information")
+	}
+
+	if args[0] != "white" && args[0] != "black" {
+		return fmt.Errorf("unpexpected <kind> value `%s`. Supports: black | white. Run with --help for more information", args[0])
+	}
+
+	if len(args) < 2 {
+		return errors.New("<ip> is required. Run with --help for more information")
+	}
+
+	_, err := entities.New(args[1])
+	if err != nil {
+		return fmt.Errorf("%s. Run with --help for more information", err)
+	}
+
+	return nil
 }
