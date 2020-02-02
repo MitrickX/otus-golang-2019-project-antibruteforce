@@ -1,8 +1,10 @@
+[![Build Status](https://travis-ci.com/MitrickX/otus-golang-2019-project-antibruteforce.svg?branch=master)](https://travis-ci.com/MitrickX/otus-golang-2019-project-antibruteforce)
+
 <h1>Otus golang 2019 project - Anti brute force microservice</h1>
-Specification [here](https://github.com/OtusTeam/Go/blob/master/projects/anti-bruteforce.md) <br>
+Specification https://github.com/OtusTeam/Go/blob/master/projects/anti-bruteforce.md <br>
 
 <h2>Algorithm</h2>
-For this anti brute force service [Token bucket algorithm](https://en.wikipedia.org/wiki/Token_bucket) is used
+For this anti brute force service Token bucket algorithm (https://en.wikipedia.org/wiki/Token_bucket) is used
 <br>
 
 <h2>GRPC server</h2>
