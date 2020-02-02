@@ -16,6 +16,15 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	AddInBlackListMethodName      = "AddInBlackList"
+	AddInWhiteListMethodName      = "AddInWhiteList"
+	DeleteFromBlackListMethodName = "DeleteFromBlackList"
+	DeleteFromWhiteListMethodName = "DeleteFromWhiteList"
+	ClearBucketMethodName         = "ClearBucket"
+	AuthMethodName                = "Auth"
+)
+
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
@@ -28,7 +37,6 @@ func docStringToString(data *gherkin.DocString) string {
 }
 
 func docStringToAuthRequest(params *gherkin.DocString) (*grpcAPI.AuthRequest, error) {
-
 	query := docStringToString(params)
 	p, err := url.ParseQuery(query)
 	if err != nil {
@@ -42,10 +50,12 @@ func docStringToAuthRequest(params *gherkin.DocString) (*grpcAPI.AuthRequest, er
 	}
 
 	if request.Login == "random" {
+		/* #nosec */
 		request.Login = "l" + strconv.Itoa(rand.Int())
 	}
 
 	if request.Password == "random" {
+		/* #nosec */
 		request.Password = "p" + strconv.Itoa(rand.Int())
 	}
 
@@ -63,7 +73,6 @@ func docStringToIPRequest(param *gherkin.DocString) (*grpcAPI.IPRequest, error) 
 }
 
 func docStringToBucketRequest(params *gherkin.DocString) (*grpcAPI.BucketRequest, error) {
-
 	query := docStringToString(params)
 	p, err := url.ParseQuery(query)
 	if err != nil {
@@ -95,18 +104,17 @@ func stringTimesToInt(val string) (int, error) {
 		return 0, fmt.Errorf("times param is not int: %s", err)
 	}
 	return times, nil
-
 }
 
 func isMethod(method string) bool {
 	switch method {
 	case
-		"AddInBlackList",
-		"AddInWhiteList",
-		"DeleteFromBlackList",
-		"DeleteFromWhiteList",
-		"ClearBucket",
-		"Auth":
+		AddInBlackListMethodName,
+		AddInWhiteListMethodName,
+		DeleteFromBlackListMethodName,
+		DeleteFromWhiteListMethodName,
+		ClearBucketMethodName,
+		AuthMethodName:
 		return true
 	default:
 		return false
@@ -116,10 +124,10 @@ func isMethod(method string) bool {
 func isIPListMethod(method string) bool {
 	switch method {
 	case
-		"AddInBlackList",
-		"AddInWhiteList",
-		"DeleteFromBlackList",
-		"DeleteFromWhiteList":
+		AddInBlackListMethodName,
+		AddInWhiteListMethodName,
+		DeleteFromBlackListMethodName,
+		DeleteFromWhiteListMethodName:
 		return true
 	default:
 		return false
@@ -129,16 +137,15 @@ func isIPListMethod(method string) bool {
 func getIPListMethodByName(name string) ipListMethod {
 	client := GetConfig().apiClient
 	switch name {
-	case "AddInBlackList":
+	case AddInBlackListMethodName:
 		return client.AddInBlackList
-	case "AddInWhiteList":
+	case AddInWhiteListMethodName:
 		return client.AddInWhiteList
-	case "DeleteFromBlackList":
+	case DeleteFromBlackListMethodName:
 		return client.DeleteFromBlackList
-	case "DeleteFromWhiteList":
+	case DeleteFromWhiteListMethodName:
 		return client.DeleteFromWhiteList
 	default:
 		return nil
-
 	}
 }

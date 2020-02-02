@@ -105,5 +105,4 @@ func getGRPCClientConfig() *GRPCClientConfig {
 	}
 
 	return grpcClientConfig
-
 }

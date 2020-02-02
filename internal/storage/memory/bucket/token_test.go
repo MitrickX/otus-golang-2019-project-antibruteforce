@@ -112,7 +112,6 @@ func TestTokenBucket_ConformAllAtOnceConcurrently(t *testing.T) {
 	if nonConformCount.val() != 1 {
 		t.Errorf("unexpected count of nonconform packets %d instreadof %d", conformCount.val(), N)
 	}
-
 }
 
 func TestTokenBucket_ConformAfterNeedDuration(t *testing.T) {

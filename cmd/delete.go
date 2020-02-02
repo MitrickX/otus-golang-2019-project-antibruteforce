@@ -16,12 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"context"
-	"fmt"
-
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/grpc"
-
 	"github.com/spf13/cobra"
 )
 
@@ -36,41 +30,20 @@ IP could be as of host or as of subnet
 <ip> = host IP or subnet IP in CIDR notation
 
 See examples below:
-	delete black 193.70.18.0/24	- delete subnet IP from black list 
-	delete black 193.70.18.123	- delete host IP from black list
-	delete white 192.70.18.0/24	- delete subnet IP from white list
-	delete white 192.70.18.123	- delete host IP from white list
+	delete black 191.80.28.0/24	- delete subnet IP from black list 
+	delete black 128.73.19.123	- delete host IP from black list
+	delete white 280.71.28.0/24	- delete subnet IP from white list
+	delete white 196.60.28.123	- delete host IP from white list
 `,
 	DisableFlagsInUseLine: true,
 	Args: func(cmd *cobra.Command, args []string) error {
 		return validateListCmdArgs(args)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		runDeleteCommand(args[0], entities.IP(args[1]))
+		runDeleteCommand(args[0], args[1])
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(deleteCmd)
-}
-
-func runDeleteCommand(kind string, ip entities.IP) {
-	cfg := getGRPCClientConfig()
-
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
-	defer cancel()
-
-	var err error
-
-	if kind == "black" {
-		_, err = cfg.apiClient.DeleteFromBlackList(ctx, &grpc.IPRequest{Ip: string(ip)})
-	} else {
-		_, err = cfg.apiClient.DeleteFromBlackList(ctx, &grpc.IPRequest{Ip: string(ip)})
-	}
-
-	if err != nil {
-		fmt.Printf("FAIL: %s\n", err)
-	} else {
-		fmt.Printf("OK: %s delete in %s list\n", ip, kind)
-	}
 }

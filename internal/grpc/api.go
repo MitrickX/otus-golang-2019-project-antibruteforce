@@ -31,6 +31,7 @@ type LimitsConfig struct {
 
 func NewLimitsConfigByViper(v *viper.Viper) LimitsConfig {
 	limits := v.GetStringMapString("limits")
+
 	return LimitsConfig{
 		LoginLimit:    getUintFromStringMap(limits, "login", DefaultLoginBucketLimit),
 		PasswordLimit: getUintFromStringMap(limits, "password", DefaultPasswordBucketLimit),
@@ -59,7 +60,6 @@ type API struct {
 }
 
 func NewAPIByViper(v *viper.Viper) *API {
-
 	api := &API{
 		LimitsConfig: NewLimitsConfigByViper(v),
 		StorageSet: StorageSet{
@@ -78,16 +78,20 @@ func NewAPIByViper(v *viper.Viper) *API {
 
 func (a *API) Run(port string) error {
 	s := grpc.NewServer()
+
 	l, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		return fmt.Errorf("API.Run, net.Listener error %w", err)
 	}
+
 	reflection.Register(s)
 	RegisterApiServer(s, a)
+
 	err = s.Serve(l)
 	if err != nil {
 		return fmt.Errorf("API.Run, grpc.Serive error %w", err)
 	}
+
 	return nil
 }
 
@@ -96,10 +100,12 @@ func (a *API) AddInBlackList(ctx context.Context, request *IPRequest) (*None, er
 	if err != nil {
 		return nil, err
 	}
+
 	err = a.BlackList.Add(ctx, ip)
 	if err != nil {
 		return nil, err
 	}
+
 	return &None{}, nil
 }
 
@@ -108,10 +114,12 @@ func (a *API) AddInWhiteList(ctx context.Context, request *IPRequest) (*None, er
 	if err != nil {
 		return nil, err
 	}
+
 	err = a.WhiteList.Add(ctx, ip)
 	if err != nil {
 		return nil, err
 	}
+
 	return &None{}, nil
 }
 
@@ -120,10 +128,12 @@ func (a *API) DeleteFromBlackList(ctx context.Context, request *IPRequest) (*Non
 	if err != nil {
 		return nil, err
 	}
+
 	err = a.BlackList.Delete(ctx, ip)
 	if err != nil {
 		return nil, err
 	}
+
 	return &None{}, nil
 }
 
@@ -132,10 +142,12 @@ func (a *API) DeleteFromWhiteList(ctx context.Context, request *IPRequest) (*Non
 	if err != nil {
 		return nil, err
 	}
+
 	err = a.WhiteList.Delete(ctx, ip)
 	if err != nil {
 		return nil, err
 	}
+
 	return &None{}, nil
 }
 
@@ -161,6 +173,7 @@ func (a *API) ClearBucket(ctx context.Context, request *BucketRequest) (*None, e
 		if err != nil {
 			return nil, err
 		}
+
 		err = deleteFromBucketStorage(ctx, a.IPStorage, ip, "ip")
 		if err != nil {
 			return nil, err
@@ -231,6 +244,7 @@ func (a *API) ClearBlackList(ctx context.Context, _ *None) (*None, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &None{}, nil
 }
 
@@ -239,6 +253,7 @@ func (a *API) ClearWhiteList(ctx context.Context, _ *None) (*None, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &None{}, nil
 }
 
@@ -302,10 +317,12 @@ func (a *API) now() time.Time {
 	if a.nowTimeFn == nil {
 		a.nowTimeFn = time.Now
 	}
+
 	return a.nowTimeFn()
 }
 
-func getBucketFromStorage(ctx context.Context, storage entities.BucketStorage, key interface{}, limit uint) (entities.Bucket, error) {
+func getBucketFromStorage(ctx context.Context, storage entities.BucketStorage,
+	key interface{}, limit uint) (entities.Bucket, error) {
 	var b entities.Bucket
 	var err error
 
@@ -324,7 +341,6 @@ func getBucketFromStorage(ctx context.Context, storage entities.BucketStorage, k
 	}
 
 	return b, nil
-
 }
 
 func deleteFromBucketStorage(ctx context.Context, storage entities.BucketStorage, key interface{}, name string) error {
@@ -332,6 +348,7 @@ func deleteFromBucketStorage(ctx context.Context, storage entities.BucketStorage
 	if err != nil {
 		return fmt.Errorf("error while deleting from %s bucket storage %s", name, err)
 	}
+
 	return nil
 }
 
@@ -340,9 +357,11 @@ func getUintFromStringMap(m map[string]string, key string, defaultVal uint) uint
 	if !ok {
 		return defaultVal
 	}
+
 	valInt, err := strconv.Atoi(val)
 	if err != nil {
 		return defaultVal
 	}
+
 	return uint(valInt)
 }

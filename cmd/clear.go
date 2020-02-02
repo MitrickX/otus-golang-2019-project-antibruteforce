@@ -54,7 +54,6 @@ See examples below:
 }
 
 func init() {
-
 	clearCmd.Flags().String("login", "", "--login=test")
 	clearCmd.Flags().String("password", "", "--password=1234")
 	clearCmd.Flags().String("ip", "", "--ip=193.70.18.123")
@@ -63,7 +62,6 @@ func init() {
 }
 
 func validateClearBucketArgs(cmd *cobra.Command, args []string) (login string, password string, ip string, err error) {
-
 	err = cmd.Flags().Parse(args)
 	if err != nil {
 		return "", "", "", err
@@ -94,7 +92,6 @@ func validateClearBucketArgs(cmd *cobra.Command, args []string) (login string, p
 	}
 
 	return login, password, ip, nil
-
 }
 
 func runClearBucketCommand(login string, password string, ip string) {
@@ -115,12 +112,15 @@ func runClearBucketCommand(login string, password string, ip string) {
 	}
 
 	var parts []string
+
 	if login != "" {
 		parts = append(parts, "login="+login)
 	}
+
 	if password != "" {
 		parts = append(parts, "password="+password)
 	}
+
 	if ip != "" {
 		parts = append(parts, "ip="+ip)
 	}

@@ -19,7 +19,6 @@ import (
 var bufConnSize = 4096
 
 func newTestAPI() *API {
-
 	return &API{
 		StorageSet: StorageSet{
 			LoginStorage:    bucket.NewStorage(),
@@ -34,8 +33,7 @@ func newTestAPI() *API {
 }
 
 // Run test grpc server
-func runTestAPI(listener *bufconn.Listener) (a *API, resultCh chan error) {
-
+func runTestAPI(listener net.Listener) (a *API, resultCh chan error) {
 	resultCh = make(chan error, 1)
 
 	a = newTestAPI()
@@ -62,7 +60,7 @@ func runTestClient(listener *bufconn.Listener) (client ApiClient, resultCh chan 
 	}
 	conn, err := grpc.Dial("bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
 	if err != nil {
-		resultCh <- fmt.Errorf("grpc Dial with bufconn connection return error %s\n", err)
+		resultCh <- fmt.Errorf("grpc Dial with bufconn connection return error %s", err)
 		return
 	}
 
@@ -72,7 +70,6 @@ func runTestClient(listener *bufconn.Listener) (client ApiClient, resultCh chan 
 
 // Run Server and Client for grpc that bound with pipe in memory
 func runTestPipe(t *testing.T) (*API, ApiClient) {
-
 	listener := bufconn.Listen(bufConnSize)
 
 	var client ApiClient
@@ -211,7 +208,6 @@ func TestAPI_ClearBucketForIP(t *testing.T) {
 
 	cnt, err := api.IPStorage.Count(context.Background())
 	assertCountResult(t, 0, cnt, err, "count after delete bucket for IP `127.0.0.1`")
-
 }
 
 // Test auth when ip conform white list, because ip in white list
@@ -323,7 +319,6 @@ func TestApi_AuthIPConformBlackList2(t *testing.T) {
 		Ip:       string(ip),
 	})
 	assertOkResponse(t, false, response, err, "2nd auth of ip `127.0.0.1`")
-
 }
 
 // Test auth when login bucket is overflowing
@@ -362,7 +357,6 @@ func TestAPI_AuthOverflowLoginBucket(t *testing.T) {
 		Ip:       string(ip),
 	})
 	assertOkResponse(t, true, response, err, fmt.Sprintf("1st auth for different login `%s`", login))
-
 }
 
 // Test auth when login bucket is not overflowing
@@ -442,7 +436,6 @@ func TestAPI_AuthOverflowPasswordBucket(t *testing.T) {
 		Ip:       string(ip),
 	})
 	assertOkResponse(t, true, response, err, fmt.Sprintf("1st auth for different password `%s`", password))
-
 }
 
 // Test auth when password bucket is overflowing
@@ -481,7 +474,8 @@ func TestAPI_AuthNotOverflowPasswordBucket(t *testing.T) {
 		Password: password,
 		Ip:       string(ip),
 	})
-	assertOkResponse(t, true, response, err, fmt.Sprintf("2d auth for same password but after 1 minute wait `%s`", password))
+	assertOkResponse(t, true, response, err,
+		fmt.Sprintf("2d auth for same password but after 1 minute wait `%s`", password))
 }
 
 // Test auth when ip bucket is overflowing
@@ -520,7 +514,6 @@ func TestAPI_AuthOverflowIPBucket(t *testing.T) {
 		Ip:       string(ip),
 	})
 	assertOkResponse(t, true, response, err, fmt.Sprintf("1st auth for different ip `%s`", ip))
-
 }
 
 // Test auth when ip bucket is overflowing

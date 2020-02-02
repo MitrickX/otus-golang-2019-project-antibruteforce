@@ -16,9 +16,12 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
+
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/grpc"
 
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
 
@@ -27,6 +30,11 @@ import (
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
+)
+
+const (
+	BlackListKind = "black"
+	WhiteListKind = "white"
 )
 
 var cfgFile string
@@ -56,7 +64,6 @@ func Execute() {
 }
 
 func init() {
-
 	cobra.OnInitialize(
 		initConfig,
 		initLogger,
@@ -109,7 +116,7 @@ func validateListCmdArgs(args []string) error {
 		return errors.New("<kind> and <ip> is required. Run with --help for more information")
 	}
 
-	if args[0] != "white" && args[0] != "black" {
+	if args[0] != WhiteListKind && args[0] != BlackListKind {
 		return fmt.Errorf("unpexpected <kind> value `%s`. Supports: black | white. Run with --help for more information", args[0])
 	}
 
@@ -123,4 +130,46 @@ func validateListCmdArgs(args []string) error {
 	}
 
 	return nil
+}
+
+func runDeleteCommand(kind, ip string) {
+	cfg := getGRPCClientConfig()
+
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
+	defer cancel()
+
+	var err error
+
+	if kind == BlackListKind {
+		_, err = cfg.apiClient.DeleteFromBlackList(ctx, &grpc.IPRequest{Ip: ip})
+	} else {
+		_, err = cfg.apiClient.DeleteFromWhiteList(ctx, &grpc.IPRequest{Ip: ip})
+	}
+
+	if err != nil {
+		fmt.Printf("FAIL: %s\n", err)
+	} else {
+		fmt.Printf("OK: %s delete in %s list\n", ip, kind)
+	}
+}
+
+func runAddCommand(kind, ip string) {
+	cfg := getGRPCClientConfig()
+
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
+	defer cancel()
+
+	var err error
+
+	if kind == BlackListKind {
+		_, err = cfg.apiClient.AddInBlackList(ctx, &grpc.IPRequest{Ip: ip})
+	} else {
+		_, err = cfg.apiClient.AddInWhiteList(ctx, &grpc.IPRequest{Ip: ip})
+	}
+
+	if err != nil {
+		fmt.Printf("FAIL: %s\n", err)
+	} else {
+		fmt.Printf("OK: %s added in %s list\n", ip, kind)
+	}
 }

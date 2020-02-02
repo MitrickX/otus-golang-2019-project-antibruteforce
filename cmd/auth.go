@@ -86,7 +86,10 @@ func runAuthCommand(login, password, ip string) {
 
 	if err != nil {
 		fmt.Printf("FAIL: %s\n", err)
-	} else if result.Ok {
+		return
+	}
+
+	if result.Ok {
 		fmt.Printf("OK: auth for login=%s, password=%s, ip=%s is allowed\n", login, password, ip)
 	} else {
 		fmt.Printf("NOT OK: auth for login=%s, password=%s, ip=%s is NOT allowed\n", login, password, ip)

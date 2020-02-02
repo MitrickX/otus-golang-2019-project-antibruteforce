@@ -13,10 +13,6 @@ type emptyBucket struct {
 	id int64
 }
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
 func newEmptyBucket() emptyBucket {
 	return emptyBucket{
 		id: rand.Int63(),
@@ -42,8 +38,7 @@ func TestStorage_Add(t *testing.T) {
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1` (2nd time)")
 
 	cnt, err := storage.Count(context.Background())
-	assertCountResult(t, 2, cnt, err, "count")
-
+	assertCountResult(t, 2, cnt, err, "count after adds")
 }
 
 func TestStorage_Delete(t *testing.T) {
@@ -91,7 +86,6 @@ func TestStorage_Get(t *testing.T) {
 
 	bucket2, err := storage.Get(context.Background(), entities.IP("127.0.0.2"))
 	assertOkBucketGetResult(t, expectedBucket2, bucket2, err, "get bucket by id `127.0.0.2`")
-
 }
 
 func TestStorage_Has(t *testing.T) {
@@ -150,7 +144,6 @@ func TestStorage_Count(t *testing.T) {
 
 	cnt, err = storage.Count(context.Background())
 	assertCountResult(t, 0, cnt, err, "count")
-
 }
 
 func assertNotErrorResult(t *testing.T, err error, prefix string) {
@@ -164,7 +157,7 @@ func assertOkResult(t *testing.T, ok bool, err error, prefix string) {
 		t.Fatalf("%s: unexpected error %s", prefix, err)
 	}
 	if !ok {
-		t.Fatalf("%s: expected be successfull", prefix)
+		t.Fatalf("%s: expected be successful", prefix)
 	}
 }
 

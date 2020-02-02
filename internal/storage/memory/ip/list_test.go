@@ -22,7 +22,7 @@ func TestList_Add(t *testing.T) {
 	assertNotErrorResult(t, err, "add ip `127.0.0.1` (2nd time)")
 
 	cnt, err := list.Count(context.Background())
-	assertCountResult(t, 2, cnt, err, "count")
+	assertCountResult(t, 2, cnt, err, "count after adds")
 }
 
 func TestList_Delete(t *testing.T) {
@@ -91,7 +91,6 @@ func TestList_IsConform(t *testing.T) {
 
 	ok, err = list.IsConform(context.Background(), entities.IP("128.0.0.4"))
 	assertNotOkResult(t, ok, err, "is not conform 128.0.0.4")
-
 }
 
 func TestList_Count(t *testing.T) {
@@ -126,7 +125,6 @@ func TestList_Count(t *testing.T) {
 
 	cnt, err = list.Count(context.Background())
 	assertCountResult(t, 0, cnt, err, "count")
-
 }
 
 func TestList_Clear(t *testing.T) {
@@ -146,7 +144,6 @@ func TestList_Clear(t *testing.T) {
 
 	cnt, err = list.Count(context.Background())
 	assertCountResult(t, 0, cnt, err, "count")
-
 }
 
 func assertNotErrorResult(t *testing.T, err error, prefix string) {

@@ -15,8 +15,10 @@ limitations under the License.
 */
 package main
 
-import "github.com/mitrickx/otus-golang-2019-project-antibruteforce/cmd"
+import (
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/cmd"
+)
 
 func main() {
-  cmd.Execute()
+	cmd.Execute()
 }

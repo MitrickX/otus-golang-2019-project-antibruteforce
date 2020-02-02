@@ -15,6 +15,11 @@ import (
 	"github.com/DATA-DOG/godog"
 )
 
+const (
+	BlackKind = "black"
+	WhiteKind = "white"
+)
+
 type featureTest struct {
 	responseErrors []error
 	okResponses    []*grpc.OkResponse
@@ -33,11 +38,11 @@ func (t *featureTest) iCallTimesMethodWithParams(times, methodName string, param
 	if err != nil {
 		return fmt.Errorf("couldn't convert string `times` to int %s", err)
 	}
+
 	return t.iCallIntTimesMethodWithParams(n, methodName, params)
 }
 
 func (t *featureTest) iCallIntTimesMethodWithParams(times int, methodName string, params *gherkin.DocString) error {
-
 	if !isMethod(methodName) {
 		return fmt.Errorf("unexpected method %s", methodName)
 	}
@@ -88,12 +93,10 @@ func (t *featureTest) iCallIntTimesMethodWithParams(times int, methodName string
 	}
 
 	return nil
-
 }
 
-func (t *featureTest) listWithIp(kind string, ip string) error {
-
-	if kind != "black" && kind != "white" {
+func (t *featureTest) listWithIP(kind string, ip string) error {
+	if kind != BlackKind && kind != WhiteKind {
 		return fmt.Errorf("unexpected kind of list `%s`", kind)
 	}
 
@@ -108,7 +111,7 @@ func (t *featureTest) listWithIp(kind string, ip string) error {
 	defer cancel()
 
 	var err error
-	if kind == "black" {
+	if kind == BlackKind {
 		_, err = apiClient.AddInBlackList(ctx, request)
 	} else {
 		_, err = apiClient.AddInWhiteList(ctx, request)
@@ -122,7 +125,6 @@ func (t *featureTest) listWithIp(kind string, ip string) error {
 }
 
 func (t *featureTest) bucketFor(params *gherkin.DocString) error {
-
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
 	defer cancel()
 
@@ -170,9 +172,9 @@ func (t *featureTest) theErrorMustBe(expected string) error {
 		if err != expectedErr {
 			if l == 1 {
 				return fmt.Errorf("unexpected response error `%s` instreadof `%s`", err, expectedErr)
-			} else {
-				return fmt.Errorf("unexpected response error (# %d) `%s` instreadof `%s`", index, err, expectedErr)
 			}
+
+			return fmt.Errorf("unexpected response error (# %d) `%s` instreadof `%s`", index, err, expectedErr)
 		}
 	}
 
@@ -195,9 +197,9 @@ func (t *featureTest) theResultMustBe(expected string) error {
 		if res.Ok != expectedBool {
 			if l == 1 {
 				return fmt.Errorf("unexpected response `%t` instreadof `%t`", res.Ok, expectedBool)
-			} else {
-				return fmt.Errorf("unexpected response error (# %d) `%t` instreadof `%t`", index, res.Ok, expectedBool)
 			}
+
+			return fmt.Errorf("unexpected response error (# %d) `%t` instreadof `%t`", index, res.Ok, expectedBool)
 		}
 	}
 
@@ -205,7 +207,6 @@ func (t *featureTest) theResultMustBe(expected string) error {
 }
 
 func (t *featureTest) cleanBucketFor(params *gherkin.DocString) error {
-
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
 	defer cancel()
 
@@ -224,7 +225,7 @@ func (t *featureTest) cleanBucketFor(params *gherkin.DocString) error {
 }
 
 func (t *featureTest) cleanList(kind string) error {
-	if kind != "black" && kind != "white" {
+	if kind != BlackKind && kind != WhiteKind {
 		return fmt.Errorf("unexpected kind of list `%s`", kind)
 	}
 
@@ -232,7 +233,7 @@ func (t *featureTest) cleanList(kind string) error {
 	defer cancel()
 
 	var err error
-	if kind == "black" {
+	if kind == BlackKind {
 		_, err = GetConfig().apiClient.ClearBlackList(ctx, &grpc.None{})
 	} else {
 		_, err = GetConfig().apiClient.ClearWhiteList(ctx, &grpc.None{})
@@ -256,7 +257,7 @@ func FeatureContext(s *godog.Suite, t *featureTest) {
 	s.Step(`^I call method "([^"]*)" with params:$`, t.iCallMethodWithParams)
 	s.Step(`^I call "([^"]*)" times method "([^"]*)" with params:$`, t.iCallTimesMethodWithParams)
 	s.Step(`^The error must be "([^"]*)"$`, t.theErrorMustBe)
-	s.Step(`^"([^"]*)" list with ip="([^"]*)"$`, t.listWithIp)
+	s.Step(`^"([^"]*)" list with ip="([^"]*)"$`, t.listWithIP)
 	s.Step(`^bucket for$`, t.bucketFor)
 	s.Step(`^The result must be "([^"]*)"$`, t.theResultMustBe)
 	s.Step(`^Wait (\d+) minute$`, t.waitMinute)

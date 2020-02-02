@@ -12,7 +12,6 @@ import (
 var logger *zap.SugaredLogger
 
 func InitLogger(v *viper.Viper) {
-
 	zapConfig := zap.NewProductionConfig()
 
 	loggerCfg := v.GetStringMap("logger")
@@ -37,7 +36,6 @@ func InitLogger(v *viper.Viper) {
 		}
 	}
 
-	var err error
 	zapLogger, err := zapConfig.Build()
 	if err != nil {
 		log.Fatalf("Can't init zap logger: %s\n", err)
@@ -52,16 +50,19 @@ func convertEmptyInterfaceStringSlice(data interface{}) ([]string, bool) {
 		return res, true
 	case []interface{}:
 		var values []string
+
 		for _, v := range res {
 			str, ok := v.(string)
 			if !ok {
 				return nil, false
 			}
-			values = append(values, str)
 
+			values = append(values, str)
 		}
+
 		return values, true
 	}
+
 	return nil, false
 }
 

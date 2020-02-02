@@ -16,11 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"context"
-	"fmt"
-
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/grpc"
 	"github.com/spf13/cobra"
 )
 
@@ -45,31 +40,10 @@ See examples below:
 		return validateListCmdArgs(args)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		runAddCommand(args[0], entities.IP(args[1]))
+		runAddCommand(args[0], args[1])
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(addCmd)
-}
-
-func runAddCommand(kind string, ip entities.IP) {
-	cfg := getGRPCClientConfig()
-
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
-	defer cancel()
-
-	var err error
-
-	if kind == "black" {
-		_, err = cfg.apiClient.AddInBlackList(ctx, &grpc.IPRequest{Ip: string(ip)})
-	} else {
-		_, err = cfg.apiClient.AddInBlackList(ctx, &grpc.IPRequest{Ip: string(ip)})
-	}
-
-	if err != nil {
-		fmt.Printf("FAIL: %s\n", err)
-	} else {
-		fmt.Printf("OK: %s added in %s list\n", ip, kind)
-	}
 }

@@ -31,7 +31,6 @@ type Config struct {
 }
 
 func init() {
-
 	cfg = &Config{}
 
 	fs := flag.NewFlagSet("integraion tests", flag.ContinueOnError)
@@ -68,28 +67,15 @@ func init() {
 	logger.InitLogger(v)
 	l := logger.GetLogger()
 
-	if *features != "" {
-		featureList := strings.Split(*features, ",")
-		pathPrefix := "../features/"
-		if *featuresPath != "" {
-			pathPrefix = *featuresPath
-		}
-		var paths []string
-		for _, f := range featureList {
-			paths = append(paths, pathPrefix+f+".feature")
-		}
-		cfg.RunnerPaths = paths
-
-		l.Infof("run on features %s", paths)
-	} else if *featuresPath != "" {
-		cfg.RunnerPaths = append(cfg.RunnerPaths, *featuresPath)
-		l.Infof("run on features %", cfg.RunnerPaths)
-	}
-
 	host := os.Getenv("GRPC_SERVER_HOST")
 	if host == "" {
 		l.Fatalf("env var `GRPC_SERVER_HOST` is required")
 	}
+
+	cfg.RunnerPaths = getRunnerPaths(*features, *featuresPath)
+	l.Infof("run on features %", cfg.RunnerPaths)
+
+	cfg.timeout = 3 * time.Second
 
 	port := os.Getenv("GRPC_SERVER_PORT")
 	if port == "" {
@@ -98,18 +84,46 @@ func init() {
 
 	addr := host + ":" + port
 
+	cfg.apiClient, err = newAPIClient(addr)
+	if err != nil {
+		l.Fatalf("establish connection with `%s` failed: %s", addr, err)
+	}
+
+	cfg.LimitsConfig = grpcAPI.NewLimitsConfigByViper(v)
+}
+
+func getRunnerPaths(features, featuresPath string) []string {
+	var paths []string
+
+	if features != "" {
+		featureList := strings.Split(features, ",")
+		pathPrefix := "../features/"
+		if featuresPath != "" {
+			pathPrefix = featuresPath
+		}
+		for _, f := range featureList {
+			paths = append(paths, pathPrefix+f+".feature")
+		}
+		return paths
+	}
+
+	if featuresPath != "" {
+		paths = append(paths, featuresPath)
+	}
+
+	return paths
+}
+
+func newAPIClient(addr string) (grpcAPI.ApiClient, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	conn, err := grpc.DialContext(ctx, addr, grpc.WithInsecure())
 	if err != nil {
-		l.Fatalf("establish connection with `%s` failed: %s", addr, err)
+		return nil, err
 	}
 
-	cfg.timeout = 3 * time.Second
-	cfg.apiClient = grpcAPI.NewApiClient(conn)
-
-	cfg.LimitsConfig = grpcAPI.NewLimitsConfigByViper(v)
+	return grpcAPI.NewApiClient(conn), nil
 }
 
 func GetConfig() *Config {
