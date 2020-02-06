@@ -30,9 +30,7 @@ func (b *TokenBucket) IsConform(t time.Time) bool {
 	b.mx.Lock()
 	defer b.mx.Unlock()
 
-	if b.count == 0 {
-		b.releaseTokens(t)
-	}
+	b.releaseTokens(t)
 
 	if b.count > 0 {
 		b.count--            // conform packet, consume one token

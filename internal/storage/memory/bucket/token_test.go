@@ -130,3 +130,33 @@ func TestTokenBucket_ConformAfterNeedDuration(t *testing.T) {
 		t.Fatalf("packet must be conform after timeout of %s", 6*time.Second)
 	}
 }
+
+func TestTokenBucket_Release(t *testing.T) {
+	N := 10
+	bucket := NewTokenBucketByLimitInMinute(uint(N))
+
+	nowTime := time.Now()
+
+	getCount := func() uint {
+		bucket.mx.Lock()
+		defer bucket.mx.Unlock()
+		return bucket.count
+	}
+
+	// Arrival of packets is one token in minute (slow for this limit rate)
+	// So after each arrival we has 9 tokens left, cause on next conform enough tokens will released
+	// Bucket always has plenty of tokens
+
+	currentTime := nowTime
+	for i := 0; i < N; i++ {
+		currentTime = currentTime.Add(time.Minute)
+		conform := bucket.IsConform(currentTime)
+		if !conform {
+			t.Fatalf("packet %d must be conform", i+1)
+		}
+		count := getCount()
+		if count < uint(N-1) {
+			t.Fatal("tokens in bucket must be plenty cause of slow arrival rates")
+		}
+	}
+}
