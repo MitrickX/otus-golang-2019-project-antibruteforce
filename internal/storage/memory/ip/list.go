@@ -2,6 +2,7 @@ package ip
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
@@ -61,7 +62,10 @@ func (l *List) IsConform(ctx context.Context, ip entities.IP) (bool, error) {
 	l.mx.RLock()
 	defer l.mx.RUnlock()
 
-	ip = ip.DropMaskPart()
+	if ip.HasMaskPart() {
+		return false, fmt.Errorf("expected pure IP (without mask) instread of `%s`", ip)
+	}
+
 	for _, ipInList := range l.list {
 		if ipInList == ip {
 			return true, nil
