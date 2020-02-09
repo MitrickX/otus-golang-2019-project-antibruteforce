@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestIP_New1(t *testing.T) {
+func TestIP_NewSubNetIP(t *testing.T) {
 	ip, err := New("127.0.0.1")
 	if err != nil {
 		t.Fatalf("unexpected error %s", err)
@@ -16,7 +16,7 @@ func TestIP_New1(t *testing.T) {
 	}
 }
 
-func TestIP_New2(t *testing.T) {
+func TestIP_NewHostIP(t *testing.T) {
 	ip, err := New("127.0.0.0/24")
 	if err != nil {
 		t.Fatalf("unexpected error %s", err)
@@ -28,14 +28,14 @@ func TestIP_New2(t *testing.T) {
 	}
 }
 
-func TestIP_New3(t *testing.T) {
+func TestIP_NewInvalidIP(t *testing.T) {
 	_, err := New("adfasdf")
 	if err == nil {
 		t.Fatal("expect error")
 	}
 }
 
-func TestIP_NewWithMaskPart1(t *testing.T) {
+func TestIP_NewWithMaskPartSubNetIP(t *testing.T) {
 	ip, err := NewWithMaskPart("127.0.0.0/24")
 	if err != nil {
 		t.Fatalf("unexpected error %s", err)
@@ -47,21 +47,21 @@ func TestIP_NewWithMaskPart1(t *testing.T) {
 	}
 }
 
-func TestIP_NewWithMaskPart2(t *testing.T) {
+func TestIP_NewWithMaskPartHostIP(t *testing.T) {
 	_, err := NewWithMaskPart("127.0.0.1")
 	if err == nil {
 		t.Fatal("expect error")
 	}
 }
 
-func TestIP_NewWithMaskPart3(t *testing.T) {
+func TestIP_NewWithMaskPartInvalidIP(t *testing.T) {
 	_, err := NewWithMaskPart("dfasdf")
 	if err == nil {
 		t.Fatal("expect error")
 	}
 }
 
-func TestIP_NewWithoutMaskPart1(t *testing.T) {
+func TestIP_NewWithoutMaskPartHostIP(t *testing.T) {
 	ip, err := NewWithoutMaskPart("127.0.0.1")
 	if err != nil {
 		t.Fatalf("unexpected error %s", err)
@@ -73,21 +73,21 @@ func TestIP_NewWithoutMaskPart1(t *testing.T) {
 	}
 }
 
-func TestIP_NewWithoutMaskPart2(t *testing.T) {
+func TestIP_NewWithoutMaskPartSubNetIP(t *testing.T) {
 	_, err := NewWithoutMaskPart("127.0.0.0/24")
 	if err == nil {
 		t.Fatal("expect error")
 	}
 }
 
-func TestIP_NewWithoutMaskPart3(t *testing.T) {
+func TestIP_NewWithoutMaskPartInvalidIP(t *testing.T) {
 	_, err := NewWithoutMaskPart("dfasdf")
 	if err == nil {
 		t.Fatal("expect error")
 	}
 }
 
-func TestIP_DropMaskPart1(t *testing.T) {
+func TestIP_DropMaskPartSubNetIP(t *testing.T) {
 	ip := IP("127.0.0.0/24")
 	expectedIP := IP("127.0.0.0")
 	resIP := ip.DropMaskPart()
@@ -97,7 +97,7 @@ func TestIP_DropMaskPart1(t *testing.T) {
 	}
 }
 
-func TestIP_DropMaskPart2(t *testing.T) {
+func TestIP_DropMaskPartHostIP(t *testing.T) {
 	ip := IP("127.0.0.1")
 	expectedIP := IP("127.0.0.1")
 	resIP := ip.DropMaskPart()
@@ -107,14 +107,14 @@ func TestIP_DropMaskPart2(t *testing.T) {
 	}
 }
 
-func TestIP_HasMaskPart1(t *testing.T) {
+func TestIP_HasMaskPartSubNetIP(t *testing.T) {
 	ip := IP("127.0.0.0/24")
 	if !ip.HasMaskPart() {
 		t.Fatalf("unexpected false")
 	}
 }
 
-func TestIP_HasMaskPart2(t *testing.T) {
+func TestIP_HasMaskPartHostIP(t *testing.T) {
 	ip := IP("127.0.0.1")
 	if ip.HasMaskPart() {
 		t.Fatalf("unexpected true")
@@ -134,7 +134,7 @@ func TestIP_Parse(t *testing.T) {
 	}
 }
 
-func TestIP_ParseAsCIDR1(t *testing.T) {
+func TestIP_ParseAsCIDRSubNetIP(t *testing.T) {
 	ip := IP("127.0.0.0/24")
 
 	netIP, maskIP, err := ip.ParseAsCIDR()
@@ -164,7 +164,7 @@ func TestIP_ParseAsCIDR1(t *testing.T) {
 	}
 }
 
-func TestIP_ParseAsCIDR2(t *testing.T) {
+func TestIP_ParseAsCIDRHostIP(t *testing.T) {
 	ip := IP("127.0.0.0")
 
 	_, _, err := ip.ParseAsCIDR()
