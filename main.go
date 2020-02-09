@@ -16,6 +16,7 @@ limitations under the License.
 package main
 
 import (
+	_ "github.com/jackc/pgx/stdlib"
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/cmd"
 )
 

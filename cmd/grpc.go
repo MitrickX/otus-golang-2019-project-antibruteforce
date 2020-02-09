@@ -20,6 +20,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/storage/sql"
+
 	grpcAPI "github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/grpc"
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/logger"
 	"github.com/spf13/cobra"
@@ -64,9 +66,16 @@ func runGRPCServer() {
 	l := logger.GetLogger()
 	l.Debugf("Run grpcAPI service on port %s", port)
 
-	err := grpcAPI.NewAPIByViper(viper.GetViper()).Run(port)
+	dbCfg := sql.NewConfigByEnv()
+
+	db, err := sql.Connect(dbCfg)
 	if err != nil {
-		l.Error(err)
+		l.Fatal(err)
+	}
+
+	err = grpcAPI.NewAPIByViper(viper.GetViper(), db).Run(port)
+	if err != nil {
+		l.Fatal(err)
 	}
 }
 

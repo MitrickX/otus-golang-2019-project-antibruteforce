@@ -8,9 +8,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/storage/memory/bucket"
-	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/storage/memory/ip"
+	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/storage/sql/ip"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -59,7 +60,7 @@ type API struct {
 	nowTimeFn func() time.Time
 }
 
-func NewAPIByViper(v *viper.Viper) *API {
+func NewAPIByViper(v *viper.Viper, db *sqlx.DB) *API {
 	api := &API{
 		LimitsConfig: NewLimitsConfigByViper(v),
 		StorageSet: StorageSet{
@@ -68,8 +69,8 @@ func NewAPIByViper(v *viper.Viper) *API {
 			IPStorage:       bucket.NewStorage(),
 		},
 		ListSet: ListSet{
-			BlackList: ip.NewList(),
-			WhiteList: ip.NewList(),
+			BlackList: ip.NewList(db, "black"),
+			WhiteList: ip.NewList(db, "white"),
 		},
 	}
 
