@@ -29,6 +29,7 @@ import (
 
 const (
 	DefaultGRPCPort = "50051"
+	DefaultGRPCHost = "127.0.0.1"
 )
 
 // grpcCmd represents the grpcAPI command
@@ -80,7 +81,7 @@ func getGRPCClientConfig() *GRPCClientConfig {
 
 	host := os.Getenv("GRPC_SERVER_HOST")
 	if host == "" {
-		l.Fatalf("env var `GRPC_SERVER_HOST` is required")
+		host = DefaultGRPCHost
 	}
 
 	port := os.Getenv("GRPC_SERVER_PORT")
