@@ -14,13 +14,30 @@ To run server execute command grpc, port specify by env var GRPC_PORT
 
 If GRPC_PORT is missed port server will be started on port 50051
 
-<h2>GRPC CLI client</h2>
-Before execute client commands you must specified server host by set up env var GRPC_SERVER_HOST<br>
-Also you can specify port of GRPC server by env var GRPC_SERVER_HOST, if this var is missed it will be assumed that port is 50051<br>
-<br>
-<strong>Example</strong>:
+To run server in container do this.
 
 >
+> make run<br>
+> 
+
+Port 50051 will be available for communicate with GRPC server.<br>
+Now you can build CLI client and run commands  
+
+<h2>GRPC CLI client</h2>
+Before execute client commands you could specified server host by set up env var GRPC_SERVER_HOST, if this var is missed it will be assumed that server is 127.0.0.1 host<br>
+Also you can specify port of GRPC server by env var GRPC_SERVER_HOST, if this var is missed it will be assumed that port is 50051<br>
+<br>
+<strong>Example (default)</strong>:
+
+>
+> make build<br>
+> ./antibruteforce auth test 1234 193.192.170.13<br>
+>
+
+<strong>Example (set vars)</strong>:
+
+>
+> make build<br>
 > export GRPC_SERVER_HOST=localhost<br>
 > export GRPC_SERVER_PORT=50052<br>
 > ./antibruteforce auth test 1234 193.192.170.13<br>
