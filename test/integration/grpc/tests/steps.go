@@ -63,6 +63,7 @@ func (t *featureTest) iCallIntTimesMethodWithParams(times int, methodName string
 
 		_, err = method(ctx, request)
 		t.responseErrors = []error{err}
+
 		return nil
 	}
 
@@ -74,8 +75,10 @@ func (t *featureTest) iCallIntTimesMethodWithParams(times int, methodName string
 		if err != nil {
 			return fmt.Errorf("couldn't convert input params to bucket request %s", err)
 		}
+
 		_, err = apiClient.ClearBucket(ctx, request)
 		t.responseErrors = []error{err}
+
 		return nil
 	}
 
@@ -87,6 +90,7 @@ func (t *featureTest) iCallIntTimesMethodWithParams(times int, methodName string
 		if err != nil {
 			return fmt.Errorf("couldn't convert input params to auth request %s", err)
 		}
+
 		okResponse, err := apiClient.Auth(ctx, request)
 		t.responseErrors = append(t.responseErrors, err)
 		t.okResponses = append(t.okResponses, okResponse)

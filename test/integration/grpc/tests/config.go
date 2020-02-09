@@ -97,13 +97,16 @@ func getRunnerPaths(features, featuresPath string) []string {
 
 	if features != "" {
 		featureList := strings.Split(features, ",")
+
 		pathPrefix := "../features/"
 		if featuresPath != "" {
 			pathPrefix = featuresPath
 		}
+
 		for _, f := range featureList {
 			paths = append(paths, pathPrefix+f+".feature")
 		}
+
 		return paths
 	}
 

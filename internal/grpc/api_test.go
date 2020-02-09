@@ -58,6 +58,7 @@ func runTestClient(listener *bufconn.Listener) (client ApiClient, resultCh chan 
 	bufDialer := func(_ context.Context, _ string) (net.Conn, error) {
 		return listener.Dial()
 	}
+
 	conn, err := grpc.Dial("bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
 	if err != nil {
 		resultCh <- fmt.Errorf("grpc Dial with bufconn connection return error %s", err)
@@ -65,6 +66,7 @@ func runTestClient(listener *bufconn.Listener) (client ApiClient, resultCh chan 
 	}
 
 	client = NewApiClient(conn)
+
 	return
 }
 
@@ -73,6 +75,7 @@ func runTestPipe(t *testing.T) (*API, ApiClient) {
 	listener := bufconn.Listen(bufConnSize)
 
 	var client ApiClient
+
 	var clientResCh chan error
 
 	service, serverResCh := runTestAPI(listener)
@@ -83,7 +86,9 @@ func runTestPipe(t *testing.T) (*API, ApiClient) {
 		if err != nil {
 			t.Error(err)
 		}
+
 		_ = listener.Close()
+
 		return nil, nil
 	default:
 		client, clientResCh = runTestClient(listener)
@@ -96,6 +101,7 @@ func runTestPipe(t *testing.T) (*API, ApiClient) {
 			if err != nil {
 				t.Error(err)
 			}
+
 			_ = listener.Close()
 		case err := <-clientResCh:
 			if err != nil {
@@ -564,6 +570,7 @@ func assertCountResult(t *testing.T, expected int, count int, err error, prefix 
 	if err != nil {
 		t.Fatalf("%s: unexpected error %s", prefix, err)
 	}
+
 	if count != expected {
 		t.Fatalf("%s: unexpected count %d instreadof %d", prefix, count, expected)
 	}
@@ -573,6 +580,7 @@ func assertOkResponse(t *testing.T, expected bool, response *OkResponse, err err
 	if err != nil {
 		t.Fatalf("%s: unexpected error %s", prefix, err)
 	}
+
 	if response.Ok != expected {
 		t.Fatalf("%s: unexpected %t instreadof %t", prefix, response.Ok, expected)
 	}

@@ -24,6 +24,7 @@ func (c *counter) inc() {
 func (c *counter) val() int {
 	c.mx.RLock()
 	defer c.mx.RUnlock()
+
 	return c.value
 }
 
@@ -31,6 +32,7 @@ func (c *counter) val() int {
 func TestTokenBucket_ConformFirst(t *testing.T) {
 	N := 10
 	bucket := NewTokenBucketByLimitInMinute(uint(N))
+
 	conform := bucket.IsConform(time.Now())
 	if !conform {
 		t.Fatalf("first packet must be conform always")
@@ -62,6 +64,7 @@ func testConformWithTimeoutStep(t *testing.T, timeout time.Duration, prefix stri
 	now := time.Unix(0, 0)
 	N := 10
 	bucket := NewTokenBucketByLimitInMinute(uint(N))
+
 	for i := 0; i < N; i++ {
 		conform := bucket.IsConform(now.Add(time.Duration(i) * timeout))
 		if !conform {
@@ -92,6 +95,7 @@ func TestTokenBucket_ConformAllAtOnceConcurrently(t *testing.T) {
 
 	for i := 0; i < N+1; i++ {
 		wg.Add(1)
+
 		go func(t time.Time) {
 			conform := bucket.IsConform(t)
 			if conform {
@@ -118,13 +122,16 @@ func TestTokenBucket_ConformAfterNeedDuration(t *testing.T) {
 	now := time.Now()
 	N := 10
 	bucket := NewTokenBucketByLimitInMinute(uint(N))
+
 	for i := 0; i < N; i++ {
 		conform := bucket.IsConform(now)
 		if !conform {
 			t.Fatalf("packet %d must be conform", i+1)
 		}
 	}
+
 	nextTime := now.Add(6 * time.Second)
+
 	conform := bucket.IsConform(nextTime)
 	if !conform {
 		t.Fatalf("packet must be conform after timeout of %s", 6*time.Second)
@@ -140,6 +147,7 @@ func TestTokenBucket_Release(t *testing.T) {
 	getCount := func() uint {
 		bucket.mx.Lock()
 		defer bucket.mx.Unlock()
+
 		return bucket.count
 	}
 
@@ -150,10 +158,12 @@ func TestTokenBucket_Release(t *testing.T) {
 	currentTime := nowTime
 	for i := 0; i < N; i++ {
 		currentTime = currentTime.Add(time.Minute)
+
 		conform := bucket.IsConform(currentTime)
 		if !conform {
 			t.Fatalf("packet %d must be conform", i+1)
 		}
+
 		count := getCount()
 		if count < uint(N-1) {
 			t.Fatal("tokens in bucket must be plenty cause of slow arrival rates")

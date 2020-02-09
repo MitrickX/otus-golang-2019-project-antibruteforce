@@ -67,6 +67,7 @@ func TestStorage_Get(t *testing.T) {
 	storage := NewStorage()
 
 	var bucket entities.Bucket
+
 	var err error
 
 	bucket, err = storage.Get(context.Background(), entities.IP("127.0.0.1"))
@@ -92,6 +93,7 @@ func TestStorage_Has(t *testing.T) {
 	storage := NewStorage()
 
 	var ok bool
+
 	var err error
 
 	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.1"))
@@ -107,6 +109,7 @@ func TestStorage_Has(t *testing.T) {
 	if err != nil {
 		t.Fatalf("has bucket for `127.0.0.1`: unexpected error %s", err)
 	}
+
 	if ok {
 		t.Fatalf("expected there is not bucket for ip `127.0.0.1` in storage")
 	}
@@ -116,6 +119,7 @@ func TestStorage_Count(t *testing.T) {
 	storage := NewStorage()
 
 	var cnt int
+
 	var err error
 
 	cnt, err = storage.Count(context.Background())
@@ -156,6 +160,7 @@ func assertOkResult(t *testing.T, ok bool, err error, prefix string) {
 	if err != nil {
 		t.Fatalf("%s: unexpected error %s", prefix, err)
 	}
+
 	if !ok {
 		t.Fatalf("%s: expected be successful", prefix)
 	}
@@ -165,6 +170,7 @@ func assertCountResult(t *testing.T, expected int, count int, err error, prefix 
 	if err != nil {
 		t.Fatalf("%s: unexpected error %s", prefix, err)
 	}
+
 	if count != expected {
 		t.Fatalf("%s: unexpected count %d instreadof %d", prefix, count, expected)
 	}
@@ -174,6 +180,7 @@ func assertOkBucketGetResult(t *testing.T, expected entities.Bucket, test entiti
 	if err != nil {
 		t.Fatalf("%s: unexpected error %s", prefix, err)
 	}
+
 	if expected != test {
 		t.Fatalf("%s: expected that test `%+v` be equals to `%+v`", prefix, test, expected)
 	}

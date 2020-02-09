@@ -38,6 +38,7 @@ func docStringToString(data *gherkin.DocString) string {
 
 func docStringToAuthRequest(params *gherkin.DocString) (*grpcAPI.AuthRequest, error) {
 	query := docStringToString(params)
+
 	p, err := url.ParseQuery(query)
 	if err != nil {
 		return nil, fmt.Errorf("parse params failed: %s", err)
@@ -64,6 +65,7 @@ func docStringToAuthRequest(params *gherkin.DocString) (*grpcAPI.AuthRequest, er
 
 func docStringToIPRequest(param *gherkin.DocString) (*grpcAPI.IPRequest, error) {
 	query := docStringToString(param)
+
 	p, err := url.ParseQuery(query)
 	if err != nil {
 		return nil, fmt.Errorf("parse params failed: %s", err)
@@ -74,6 +76,7 @@ func docStringToIPRequest(param *gherkin.DocString) (*grpcAPI.IPRequest, error) 
 
 func docStringToBucketRequest(params *gherkin.DocString) (*grpcAPI.BucketRequest, error) {
 	query := docStringToString(params)
+
 	p, err := url.ParseQuery(query)
 	if err != nil {
 		return nil, fmt.Errorf("parse params failed: %s", err)
@@ -90,19 +93,24 @@ func stringTimesToInt(val string) (int, error) {
 	if val == "" {
 		return 1, nil
 	}
+
 	if val == "loginLimit" {
 		return int(GetConfig().LoginLimit), nil
 	}
+
 	if val == "passwordLimit" {
 		return int(GetConfig().PasswordLimit), nil
 	}
+
 	if val == "ipLimit" {
 		return int(GetConfig().IPLimit), nil
 	}
+
 	times, err := strconv.Atoi(val)
 	if err != nil {
 		return 0, fmt.Errorf("times param is not int: %s", err)
 	}
+
 	return times, nil
 }
 
@@ -136,6 +144,7 @@ func isIPListMethod(method string) bool {
 
 func getIPListMethodByName(name string) ipListMethod {
 	client := GetConfig().apiClient
+
 	switch name {
 	case AddInBlackListMethodName:
 		return client.AddInBlackList

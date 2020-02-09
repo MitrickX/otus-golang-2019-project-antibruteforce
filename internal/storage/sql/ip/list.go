@@ -16,9 +16,6 @@ import (
 type BitMask string
 
 type Row struct {
-	//IPBits      net.IPBits      `db:"ip"`
-	//MaskBits    net.IPMask  `db:"mask"`
-
 	IPBits   BitMask     `db:"ip"`
 	MaskBits *BitMask    `db:"mask"` // pointer because could be nil (NULL)
 	IP       entities.IP `db:"ip_str"`
@@ -102,6 +99,7 @@ func (l *List) Has(ctx context.Context, ip entities.IP) (bool, error) {
 	}
 
 	var count int
+
 	queryRow := stmt.QueryRowxContext(ctx, row)
 
 	err = queryRow.Scan(&count)
@@ -148,6 +146,7 @@ func (l *List) IsConform(ctx context.Context, ip entities.IP) (bool, error) {
 	}
 
 	var resIP string
+
 	queryRow := stmt.QueryRowxContext(ctx, row)
 
 	err = queryRow.Scan(&resIP)
@@ -167,6 +166,7 @@ func (l *List) Count(ctx context.Context) (int, error) {
 	query := `SELECT COUNT(*) FROM ip_list WHERE kind = $1`
 
 	var count int
+
 	queryRow := l.db.QueryRowContext(ctx, query, l.kind)
 
 	err := queryRow.Scan(&count)
@@ -201,6 +201,7 @@ func convertIPToRow(ip entities.IP, kind string) (Row, error) {
 		row.MaskInt = &maskInt
 
 		var err error
+
 		var netIPNet *net.IPNet
 
 		netIP, netIPNet, err = ip.ParseAsCIDR()
@@ -236,9 +237,11 @@ func convertIPToRow(ip entities.IP, kind string) (Row, error) {
 func convertByteSliceToBitMask(bs []byte) BitMask {
 	lbs := len(bs)
 	byteBits := make([]string, lbs)
+
 	for i := 0; i < lbs; i++ {
 		byteBits[i] = fmt.Sprintf("%08b", bs[i])
 	}
+
 	return BitMask(strings.Join(byteBits, ""))
 }
 
@@ -249,6 +252,7 @@ func buildFindIPCondition(row Row) string {
 	} else {
 		condition = `ip = :ip AND kind = :kind`
 	}
+
 	return condition
 }
 func wrapAddError(kind string, err error) error {

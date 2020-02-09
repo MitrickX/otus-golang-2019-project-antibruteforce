@@ -203,6 +203,7 @@ func (a *API) Auth(ctx context.Context, request *AuthRequest) (*OkResponse, erro
 	if err != nil {
 		return nil, err
 	}
+
 	if conform {
 		return &OkResponse{Ok: false}, nil
 	}
@@ -212,6 +213,7 @@ func (a *API) Auth(ctx context.Context, request *AuthRequest) (*OkResponse, erro
 	if err != nil {
 		return nil, err
 	}
+
 	if conform {
 		return &OkResponse{Ok: true}, nil
 	}
@@ -220,6 +222,7 @@ func (a *API) Auth(ctx context.Context, request *AuthRequest) (*OkResponse, erro
 	if err != nil {
 		return nil, err
 	}
+
 	if !conform {
 		return &OkResponse{Ok: false}, nil
 	}
@@ -228,6 +231,7 @@ func (a *API) Auth(ctx context.Context, request *AuthRequest) (*OkResponse, erro
 	if err != nil {
 		return nil, err
 	}
+
 	if !conform {
 		return &OkResponse{Ok: false}, nil
 	}
@@ -268,6 +272,7 @@ func (a *API) isConformByBlackList(ctx context.Context, ip entities.IP) (bool, e
 
 func (a *API) isConformByIPBucket(ctx context.Context, ip entities.IP) (bool, error) {
 	var b entities.Bucket
+
 	var err error
 
 	b, err = a.getIPBucket(ctx, ip)
@@ -280,6 +285,7 @@ func (a *API) isConformByIPBucket(ctx context.Context, ip entities.IP) (bool, er
 
 func (a *API) isConformByPasswordBucket(ctx context.Context, password string) (bool, error) {
 	var b entities.Bucket
+
 	var err error
 
 	b, err = a.getPasswordBucket(ctx, password)
@@ -292,6 +298,7 @@ func (a *API) isConformByPasswordBucket(ctx context.Context, password string) (b
 
 func (a *API) isConformByLoginBucket(ctx context.Context, login string) (bool, error) {
 	var b entities.Bucket
+
 	var err error
 
 	b, err = a.getLoginBucket(ctx, login)
@@ -325,6 +332,7 @@ func (a *API) now() time.Time {
 func getBucketFromStorage(ctx context.Context, storage entities.BucketStorage,
 	key interface{}, limit uint) (entities.Bucket, error) {
 	var b entities.Bucket
+
 	var err error
 
 	b, err = storage.Get(ctx, key)
@@ -335,6 +343,7 @@ func getBucketFromStorage(ctx context.Context, storage entities.BucketStorage,
 	// bucket not exist yet
 	if b == nil {
 		b = bucket.NewTokenBucketByLimitInMinute(limit)
+
 		err = storage.Add(ctx, b, key)
 		if err != nil {
 			return nil, err

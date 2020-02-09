@@ -73,7 +73,8 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.otus-golang-2019-project-antibruteforce.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "",
+		"config file (default is $HOME/.otus-golang-2019-project-antibruteforce.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -117,7 +118,8 @@ func validateListCmdArgs(args []string) error {
 	}
 
 	if args[0] != WhiteListKind && args[0] != BlackListKind {
-		return fmt.Errorf("unpexpected <kind> value `%s`. Supports: black | white. Run with --help for more information", args[0])
+		return fmt.Errorf("unpexpected <kind> value `%s`. "+
+			"Supports: black | white. Run with --help for more information", args[0])
 	}
 
 	if len(args) < 2 {

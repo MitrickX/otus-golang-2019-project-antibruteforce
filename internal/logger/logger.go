@@ -82,6 +82,7 @@ OUTER:
 			resultPaths = append(resultPaths, path)
 		}
 	}
+
 	return resultPaths
 }
 
@@ -89,5 +90,6 @@ func GetLogger() *zap.SugaredLogger {
 	if logger == nil {
 		log.Fatal("Logger is not inited")
 	}
+
 	return logger
 }

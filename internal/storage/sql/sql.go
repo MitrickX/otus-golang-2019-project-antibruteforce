@@ -60,6 +60,7 @@ func Connect(cfg Config) (*sqlx.DB, error) {
 		if connectErr == nil {
 			break
 		}
+
 		time.Sleep(time.Second)
 	}
 
@@ -80,6 +81,7 @@ func IsTableExists(ctx context.Context, db *sqlx.DB, dbName string, tableName st
 		)`
 
 	var ok bool
+
 	row := db.QueryRowxContext(ctx, query, dbName, tableName)
 
 	err := row.Scan(&ok)

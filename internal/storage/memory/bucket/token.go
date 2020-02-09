@@ -35,6 +35,7 @@ func (b *TokenBucket) IsConform(t time.Time) bool {
 	if b.count > 0 {
 		b.count--            // conform packet, consume one token
 		b.lct = t.UnixNano() // last conform time
+
 		return true
 	}
 

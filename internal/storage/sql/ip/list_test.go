@@ -27,6 +27,7 @@ func TestConvertByteSliceToBitMask(t *testing.T) {
 	bs := []byte{127, 0, 0, 1}
 	bitMask := convertByteSliceToBitMask(bs)
 	expectedBitMask := BitMask("01111111000000000000000000000001")
+
 	if bitMask != expectedBitMask {
 		t.Fatalf("unexpected bit mask `%s` instead of `%s` when convert byte slice %s",
 			bitMask, expectedBitMask, bs)
@@ -84,8 +85,26 @@ func TestConvertIpToRow_IPv6(t *testing.T) {
 		t.Fatalf("unexpected error %s", err)
 	}
 
+	bitMask := BitMask(
+		"00100000" +
+			"00000001" +
+			"00001101" +
+			"10111000" +
+			"00000000" +
+			"00000000" +
+			"00010010" +
+			"00110100" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000010")
+
 	expectedRow := Row{
-		IPBits:   BitMask("00100000000000010000110110111000000000000000000000010010001101000000000000000000000000000000000000000000000000000000000000000010"),
+		IPBits:   bitMask,
 		MaskBits: nil,
 		IP:       ip,
 		MaskInt:  nil,
@@ -104,11 +123,46 @@ func TestConvertIpToRow_SubNetIPv6(t *testing.T) {
 		t.Fatalf("unexpected error %s", err)
 	}
 
-	maskBits := BitMask("11111111111111111111111111111111111111111111111111111111111111110000000000000000000000000000000000000000000000000000000000000000")
+	maskBits := BitMask(
+		"11111111" +
+			"11111111" +
+			"11111111" +
+			"11111111" +
+			"11111111" +
+			"11111111" +
+			"11111111" +
+			"11111111" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000000")
+
 	maskInt := 64
 
+	ipBits := BitMask(
+		"00100000" +
+			"00000001" +
+			"00001101" +
+			"10111000" +
+			"00000000" +
+			"00000000" +
+			"00010010" +
+			"00110100" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000000" +
+			"00000010")
+
 	expectedRow := Row{
-		IPBits:   BitMask("00100000000000010000110110111000000000000000000000010010001101000000000000000000000000000000000000000000000000000000000000000010"),
+		IPBits:   ipBits,
 		MaskBits: &maskBits,
 		IP:       ip,
 		MaskInt:  &maskInt,

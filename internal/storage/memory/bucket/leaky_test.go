@@ -20,6 +20,7 @@ func TestLeakyBucket_Conform(t *testing.T) {
 
 	for i := 0; i < len(expected); i++ {
 		tm := time.Unix(0, expected[i].arrival)
+
 		conform := bucket.IsConform(tm)
 		if conform != expected[i].conform {
 			t.Errorf("unexpected that packet %d with time arrival %d has conform status(%t)", i, expected[i].arrival, conform)

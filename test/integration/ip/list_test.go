@@ -48,6 +48,7 @@ func WaitForTable() {
 
 	// we will run with timeout in loop, so if any cancel not stop yet will called in defer
 	var cancel context.CancelFunc
+
 	defer func() {
 		if cancel != nil {
 			cancel()
@@ -56,6 +57,7 @@ func WaitForTable() {
 
 	for i := 0; i < cfg.ConnectRetries; i++ {
 		var ok bool
+
 		var ctx context.Context
 
 		ctx, cancel = context.WithTimeout(context.Background(), DefaultContextTimeout)
@@ -142,6 +144,7 @@ func TestList_Has(t *testing.T) {
 	list := NewList()
 
 	var ok bool
+
 	var err error
 
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultContextTimeout)
@@ -160,6 +163,7 @@ func TestList_Has(t *testing.T) {
 	if err != nil {
 		t.Fatalf("has `127.0.0.1`: unexpected error %s", err)
 	}
+
 	if ok {
 		t.Fatalf("expected there is not ip `127.0.0.1` in list")
 	}
@@ -169,6 +173,7 @@ func TestList_IsConform_IPv4(t *testing.T) {
 	list := NewList()
 
 	var ok bool
+
 	var err error
 
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultContextTimeout)
@@ -194,6 +199,7 @@ func TestList_IsConform_IPv6(t *testing.T) {
 	list := NewList()
 
 	var ok bool
+
 	var err error
 
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultContextTimeout)
@@ -247,6 +253,7 @@ func TestList_Count(t *testing.T) {
 	list := NewList()
 
 	var cnt int
+
 	var err error
 
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultContextTimeout)
@@ -284,6 +291,7 @@ func TestList_Clear(t *testing.T) {
 	list := NewList()
 
 	var cnt int
+
 	var err error
 
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultContextTimeout)
@@ -312,6 +320,7 @@ func assertOkResult(t *testing.T, ok bool, err error, prefix string) {
 	if err != nil {
 		t.Fatalf("%s: unexpected error %s", prefix, err)
 	}
+
 	if !ok {
 		t.Fatalf("%s: expected be true", prefix)
 	}
@@ -321,6 +330,7 @@ func assertNotOkResult(t *testing.T, ok bool, err error, prefix string) {
 	if err != nil {
 		t.Fatalf("%s: unexpected error %s", prefix, err)
 	}
+
 	if ok {
 		t.Fatalf("%s: expected be false", prefix)
 	}
@@ -330,6 +340,7 @@ func assertCountResult(t *testing.T, expected int, count int, err error, prefix 
 	if err != nil {
 		t.Fatalf("%s: unexpected error %s", prefix, err)
 	}
+
 	if count != expected {
 		t.Fatalf("%s: unexpected count %d instreadof %d", prefix, count, expected)
 	}
