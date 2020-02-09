@@ -1,0 +1,30 @@
+version: '3'
+services:
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_USER=otus
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=antibruteforce
+    ports:
+      - 5432
+
+  flyway:
+    image: 'flyway/flyway'
+    command: -url=jdbc:postgresql://postgres:5432/antibruteforce -connectRetries=20 -user=otus -password=1234 migrate
+    volumes:
+      - ../../sql:/flyway/sql
+    restart: on-failure
+    depends_on:
+      - postgres
+
+  grpc:
+    build:
+      context: ../..
+      dockerfile: ./build/package/Dockerfile
+    command: ./antibrutefroce --config ./configs/config.yaml grpc
+    volumes: 
+      - ../../configs:/root/configs
+    ports:
+      - 50051:50051

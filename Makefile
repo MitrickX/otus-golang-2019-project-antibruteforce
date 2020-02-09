@@ -1,12 +1,12 @@
-.PHONY: up down restart test build
+.PHONY: run stop restart test build
 
-up:
-	docker-compose -f ./build/package/docker-compose-tests.yml up -d --build
+run:
+	docker-compose -f ./build/package/docker-compose.yml up -d --build
 
-dowm:
-	docker-compose down
+stop:
+	docker-compose -f ./build/package/docker-compose.yml down
 
-restart: down up
+restart: stop run
 
 build:
 	go build -o antibruteforce .
