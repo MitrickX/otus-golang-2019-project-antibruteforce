@@ -158,6 +158,7 @@ func TestIP_ParseAsCIDR1(t *testing.T) {
 
 	ones, _ := maskIP.Mask.Size()
 
+	//nolint:gomnd
 	if ones != 24 {
 		t.Fatalf("unexpected len %d instreadof %d", ones, 24)
 	}

@@ -52,14 +52,17 @@ func init() {
 }
 
 func validateAuthCmdArgs(args []string) error {
+	//nolint:gomnd
 	if len(args) < 1 {
 		return errors.New("<login>, <password> and <ip> is required. Run with --help for more information")
 	}
 
+	//nolint:gomnd
 	if len(args) < 2 {
 		return errors.New("<password> and <ip> is required. Run with --help for more information")
 	}
 
+	//nolint:gomnd
 	if len(args) < 3 {
 		return errors.New("<ip> is required. Run with --help for more information")
 	}

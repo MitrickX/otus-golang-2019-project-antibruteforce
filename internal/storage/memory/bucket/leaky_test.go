@@ -11,7 +11,10 @@ type packet struct {
 }
 
 func TestLeakyBucket_Conform(t *testing.T) {
+	//nolint:gomnd
 	increment := time.Duration(4)
+
+	//nolint:gomnd
 	limit := time.Duration(6)
 
 	bucket := NewLeakyBucket(increment, limit)
@@ -31,46 +34,57 @@ func TestLeakyBucket_Conform(t *testing.T) {
 func getExpectedResult() []packet {
 	return []packet{
 		{
+			//nolint:gomnd
 			arrival: 2,
 			conform: true,
 		},
 		{
+			//nolint:gomnd
 			arrival: 3,
 			conform: true,
 		},
 		{
+			//nolint:gomnd
 			arrival: 6,
 			conform: true,
 		},
 		{
+			//nolint:gomnd
 			arrival: 9,
 			conform: true,
 		},
 		{
+			//nolint:gomnd
 			arrival: 11,
 			conform: false,
 		},
 		{
+			//nolint:gomnd
 			arrival: 16,
 			conform: true,
 		},
 		{
+			//nolint:gomnd
 			arrival: 23,
 			conform: true,
 		},
 		{
+			//nolint:gomnd
 			arrival: 24,
 			conform: true,
 		},
 		{
+			//nolint:gomnd
 			arrival: 25,
 			conform: true,
 		},
 		{
+			//nolint:gomnd
 			arrival: 26,
 			conform: false,
 		},
 		{
+			//nolint:gomnd
 			arrival: 30,
 			conform: true,
 		},

@@ -91,6 +91,7 @@ func docStringToBucketRequest(params *gherkin.DocString) (*grpcAPI.BucketRequest
 
 func stringTimesToInt(val string) (int, error) {
 	if val == "" {
+		//nolint:gomnd
 		return 1, nil
 	}
 

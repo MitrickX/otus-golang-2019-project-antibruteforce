@@ -30,7 +30,8 @@ func newFeatureTest() *featureTest {
 }
 
 func (t *featureTest) iCallMethodWithParams(methodName string, params *gherkin.DocString) error {
-	return t.iCallIntTimesMethodWithParams(1, methodName, params)
+	times := 1
+	return t.iCallIntTimesMethodWithParams(times, methodName, params)
 }
 
 func (t *featureTest) iCallTimesMethodWithParams(times, methodName string, params *gherkin.DocString) error {
@@ -172,9 +173,11 @@ func (t *featureTest) theErrorMustBe(expected string) error {
 		expectedErr = errors.New(expected)
 	}
 
+	singleErrLen := 1
+
 	for index, err := range t.responseErrors {
 		if err != expectedErr {
-			if l == 1 {
+			if l == singleErrLen {
 				return fmt.Errorf("unexpected response error `%s` instreadof `%s`", err, expectedErr)
 			}
 
@@ -197,9 +200,11 @@ func (t *featureTest) theResultMustBe(expected string) error {
 		expectedBool = true
 	}
 
+	singleErrLen := 1
+
 	for index, res := range t.okResponses {
 		if res.Ok != expectedBool {
-			if l == 1 {
+			if l == singleErrLen {
 				return fmt.Errorf("unexpected response `%t` instreadof `%t`", res.Ok, expectedBool)
 			}
 

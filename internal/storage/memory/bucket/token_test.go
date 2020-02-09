@@ -46,17 +46,23 @@ func TestTokenBucket_ConformAllAtOnce(t *testing.T) {
 
 // Test that sent N packets with timeout step 50ms are conform but N + 1 not anymore
 func TestTokenBucket_ConformWithSmallTimeoutStep(t *testing.T) {
-	testConformWithTimeoutStep(t, 50*time.Millisecond, "timeout step is 50ms")
+	//nolint:gomnd
+	smallTimeout := 50 * time.Millisecond
+	testConformWithTimeoutStep(t, smallTimeout, "timeout step is 50ms")
 }
 
 // Test that sent N packets with timeout step 100ms are conform but N + 1 not anymore
 func TestTokenBucket_ConformWithMiddleTimeoutStep(t *testing.T) {
-	testConformWithTimeoutStep(t, 100*time.Millisecond, "timeout step is 100ms")
+	//nolint:gomnd
+	middleTimeout := 100 * time.Millisecond
+	testConformWithTimeoutStep(t, middleTimeout, "timeout step is 100ms")
 }
 
 // Test that sent N packets with timeout step 5s are conform but N + 1 not anymore
 func TestTokenBucket_ConformWithBigTimeoutStep(t *testing.T) {
-	testConformWithTimeoutStep(t, 5*time.Second, "timeout step is 5s")
+	//nolint:gomnd
+	bigTimeout := 5 * time.Second
+	testConformWithTimeoutStep(t, bigTimeout, "timeout step is 5s")
 }
 
 // Test that send N packets with some timeout step are conform but N + 1 not anymore
@@ -68,13 +74,14 @@ func testConformWithTimeoutStep(t *testing.T, timeout time.Duration, prefix stri
 	for i := 0; i < N; i++ {
 		conform := bucket.IsConform(now.Add(time.Duration(i) * timeout))
 		if !conform {
-			t.Fatalf("%s: packet %d must be conform", prefix, i+1)
+			t.Fatalf("%s: packet %d must be conform", prefix, i)
 		}
 	}
 
 	// (N + 1)th must non conform
 	conform := bucket.IsConform(now.Add(time.Duration(N) * timeout))
 	if conform {
+		//nolint:gomnd
 		t.Fatalf("%s: %d packet must be not conform, cause bucket is overflowing", prefix, N+1)
 	}
 }
@@ -94,6 +101,7 @@ func TestTokenBucket_ConformAllAtOnceConcurrently(t *testing.T) {
 	wg := sync.WaitGroup{}
 
 	for i := 0; i < N+1; i++ {
+		//nolint:gomnd
 		wg.Add(1)
 
 		go func(t time.Time) {
@@ -103,6 +111,7 @@ func TestTokenBucket_ConformAllAtOnceConcurrently(t *testing.T) {
 			} else {
 				nonConformCount.inc()
 			}
+
 			wg.Done()
 		}(now)
 	}
@@ -113,6 +122,7 @@ func TestTokenBucket_ConformAllAtOnceConcurrently(t *testing.T) {
 		t.Errorf("unexpected count of conform packets %d instreadof %d", conformCount.val(), N)
 	}
 
+	//nolint:gomnd
 	if nonConformCount.val() != 1 {
 		t.Errorf("unexpected count of nonconform packets %d instreadof %d", conformCount.val(), N)
 	}
@@ -126,15 +136,18 @@ func TestTokenBucket_ConformAfterNeedDuration(t *testing.T) {
 	for i := 0; i < N; i++ {
 		conform := bucket.IsConform(now)
 		if !conform {
-			t.Fatalf("packet %d must be conform", i+1)
+			t.Fatalf("packet %d must be conform", i)
 		}
 	}
 
-	nextTime := now.Add(6 * time.Second)
+	//nolint:gomnd
+	timeout := 6 * time.Second
+
+	nextTime := now.Add(timeout)
 
 	conform := bucket.IsConform(nextTime)
 	if !conform {
-		t.Fatalf("packet must be conform after timeout of %s", 6*time.Second)
+		t.Fatalf("packet must be conform after timeout of %s", timeout)
 	}
 }
 
@@ -161,10 +174,12 @@ func TestTokenBucket_Release(t *testing.T) {
 
 		conform := bucket.IsConform(currentTime)
 		if !conform {
-			t.Fatalf("packet %d must be conform", i+1)
+			t.Fatalf("packet %d must be conform", i)
 		}
 
 		count := getCount()
+
+		//nolint:gomnd
 		if count < uint(N-1) {
 			t.Fatal("tokens in bucket must be plenty cause of slow arrival rates")
 		}

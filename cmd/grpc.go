@@ -30,8 +30,10 @@ import (
 )
 
 const (
-	DefaultGRPCPort = "50051"
-	DefaultGRPCHost = "127.0.0.1"
+	DefaultGRPCPort             = "50051"
+	DefaultGRPCHost             = "127.0.0.1"
+	DefaultDialTimeout          = 5 * time.Second
+	DefaultClientContextTimeout = 3 * time.Second
 )
 
 // grpcCmd represents the grpcAPI command
@@ -100,7 +102,7 @@ func getGRPCClientConfig() *GRPCClientConfig {
 
 	addr := host + ":" + port
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), DefaultDialTimeout)
 	defer cancel()
 
 	conn, err := grpc.DialContext(ctx, addr, grpc.WithInsecure())
@@ -110,7 +112,7 @@ func getGRPCClientConfig() *GRPCClientConfig {
 
 	grpcClientConfig = &GRPCClientConfig{
 		addr:      addr,
-		timeout:   3 * time.Second,
+		timeout:   DefaultClientContextTimeout,
 		apiClient: grpcAPI.NewApiClient(conn),
 	}
 

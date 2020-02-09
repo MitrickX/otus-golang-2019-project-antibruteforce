@@ -35,6 +35,7 @@ import (
 const (
 	BlackListKind = "black"
 	WhiteListKind = "white"
+	FailExitCode  = 1
 )
 
 var cfgFile string
@@ -59,7 +60,7 @@ to quickly create a Cobra application.`,
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		os.Exit(FailExitCode)
 	}
 }
 
@@ -91,7 +92,7 @@ func initConfig() {
 		home, err := homedir.Dir()
 		if err != nil {
 			fmt.Println(err)
-			os.Exit(1)
+			os.Exit(FailExitCode)
 		}
 
 		// Search config in home directory with name ".otus-golang-2019-project-antibruteforce" (without extension).
@@ -113,6 +114,7 @@ func initLogger() {
 
 // Validate cmd args for list commands: add, delete
 func validateListCmdArgs(args []string) error {
+	//nolint:gomnd
 	if len(args) < 1 {
 		return errors.New("<kind> and <ip> is required. Run with --help for more information")
 	}
@@ -122,6 +124,7 @@ func validateListCmdArgs(args []string) error {
 			"Supports: black | white. Run with --help for more information", args[0])
 	}
 
+	//nolint:gomnd
 	if len(args) < 2 {
 		return errors.New("<ip> is required. Run with --help for more information")
 	}

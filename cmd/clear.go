@@ -125,6 +125,7 @@ func runClearBucketCommand(login string, password string, ip string) {
 		parts = append(parts, "ip="+ip)
 	}
 
+	//nolint:gomnd
 	if len(parts) > 1 {
 		fmt.Printf("OK: clear buckets for %s\n", strings.Join(parts, ", "))
 	} else {

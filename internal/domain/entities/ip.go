@@ -62,11 +62,13 @@ func (ip IP) DropMaskPart() IP {
 
 func (ip IP) HasMaskPart() bool {
 	parts := strings.Split(string(ip), "/")
+	//nolint:gomnd
 	return len(parts) > 1
 }
 
 func (ip IP) GetMaskPart() string {
 	parts := strings.Split(string(ip), "/")
+	//nolint:gomnd
 	if len(parts) > 1 {
 		return parts[1]
 	}

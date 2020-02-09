@@ -107,6 +107,7 @@ func runTestPipe(t *testing.T) (*API, ApiClient) {
 			if err != nil {
 				t.Error(err)
 			}
+
 			_ = listener.Close()
 		}
 	}()
@@ -174,7 +175,10 @@ func TestAPI_DeleteFromWhiteList(t *testing.T) {
 func TestAPI_ClearBucketForLogin(t *testing.T) {
 	api, client := runTestPipe(t)
 
-	err := api.LoginStorage.Add(context.Background(), bucket.NewTokenBucketByLimitInMinute(10), "test")
+	//nolint:gomnd
+	limit := 10
+
+	err := api.LoginStorage.Add(context.Background(), bucket.NewTokenBucketByLimitInMinute(uint(limit)), "test")
 	assertNotErrorResult(t, err, "add new bucket for login `test`")
 
 	_, err = client.ClearBucket(context.Background(), &BucketRequest{Login: "test"})
@@ -188,7 +192,10 @@ func TestAPI_ClearBucketForLogin(t *testing.T) {
 func TestAPI_ClearBucketForPassword(t *testing.T) {
 	api, client := runTestPipe(t)
 
-	err := api.PasswordStorage.Add(context.Background(), bucket.NewTokenBucketByLimitInMinute(10), "1234")
+	//nolint:gomnd
+	limit := 10
+
+	err := api.PasswordStorage.Add(context.Background(), bucket.NewTokenBucketByLimitInMinute(uint(limit)), "1234")
 	assertNotErrorResult(t, err, "add new bucket for password `1234`")
 
 	_, err = client.ClearBucket(context.Background(), &BucketRequest{Password: "1234"})
@@ -202,9 +209,11 @@ func TestAPI_ClearBucketForPassword(t *testing.T) {
 func TestAPI_ClearBucketForIP(t *testing.T) {
 	api, client := runTestPipe(t)
 
+	limit := 10
+
 	err := api.IPStorage.Add(
 		context.Background(),
-		bucket.NewTokenBucketByLimitInMinute(10),
+		bucket.NewTokenBucketByLimitInMinute(uint(limit)),
 		entities.IP("127.0.0.1"),
 	)
 	assertNotErrorResult(t, err, "add new bucket for IPBits `127.0.0.1`")
