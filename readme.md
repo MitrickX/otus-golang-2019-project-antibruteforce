@@ -1,8 +1,8 @@
+<h1>Otus golang 2019 project - Anti brute force microservice</h1>
 [![Build Status](https://travis-ci.com/MitrickX/otus-golang-2019-project-antibruteforce.svg?branch=master)](https://travis-ci.com/MitrickX/otus-golang-2019-project-antibruteforce)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/MitrickX/otus-golang-2019-project-antibruteforce)](https://goreportcard.com/report/github.com/MitrickX/otus-golang-2019-project-antibruteforce)
 
-<h1>Otus golang 2019 project - Anti brute force microservice</h1>
 Specification https://github.com/OtusTeam/Go/blob/master/projects/anti-bruteforce.md <br>
 
 <h2>Algorithm</h2>
