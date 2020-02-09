@@ -28,6 +28,14 @@ services:
       - ../../configs:/root/configs
     ports:
       - 50051
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DBNAME=antibruteforce
+      - DB_USER=otus
+      - DB_PASSWORD=1234
+      - DB_CONNECT_RETRIES=20
+
 
   tests:
     build:
