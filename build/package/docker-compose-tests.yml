@@ -1,5 +1,24 @@
 version: '3'
 services:
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_USER=otus
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=antibruteforce
+    ports:
+      - 5432
+
+  flyway:
+    image: 'flyway/flyway'
+    command: -url=jdbc:postgresql://postgres:5432/antibruteforce -connectRetries=20 -user=otus -password=1234 migrate
+    volumes:
+      - ../../sql:/flyway/sql
+    restart: on-failure
+    depends_on:
+      - postgres
+
   grpc:
     build:
       context: ../..
@@ -18,8 +37,15 @@ services:
     environment:
       - GRPC_SERVER_HOST=grpc
       - GRPC_SERVER_PORT=50051
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DBNAME=antibruteforce
+      - DB_USER=otus
+      - DB_PASSWORD=1234
+      - DB_CONNECT_RETRIES=20
     volumes:
       - ../../configs:/root/configs
       - ../../test/integration/grpc/features:/root/features
     depends_on:
       - grpc
+      - flyway

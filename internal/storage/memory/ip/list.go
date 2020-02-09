@@ -63,7 +63,7 @@ func (l *List) IsConform(ctx context.Context, ip entities.IP) (bool, error) {
 	defer l.mx.RUnlock()
 
 	if ip.HasMaskPart() {
-		return false, fmt.Errorf("expected pure IP (without mask) instread of `%s`", ip)
+		return false, fmt.Errorf("expected pure IPBits (without mask) instread of `%s`", ip)
 	}
 
 	for _, ipInList := range l.list {

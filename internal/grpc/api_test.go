@@ -201,13 +201,13 @@ func TestAPI_ClearBucketForIP(t *testing.T) {
 		bucket.NewTokenBucketByLimitInMinute(10),
 		entities.IP("127.0.0.1"),
 	)
-	assertNotErrorResult(t, err, "add new bucket for IP `127.0.0.1`")
+	assertNotErrorResult(t, err, "add new bucket for IPBits `127.0.0.1`")
 
 	_, err = client.ClearBucket(context.Background(), &BucketRequest{Ip: "127.0.0.1"})
-	assertNotErrorResult(t, err, "delete bucket for IP `127.0.0.1`")
+	assertNotErrorResult(t, err, "delete bucket for IPBits `127.0.0.1`")
 
 	cnt, err := api.IPStorage.Count(context.Background())
-	assertCountResult(t, 0, cnt, err, "count after delete bucket for IP `127.0.0.1`")
+	assertCountResult(t, 0, cnt, err, "count after delete bucket for IPBits `127.0.0.1`")
 }
 
 // Test auth when ip conform white list, because ip in white list
@@ -484,7 +484,7 @@ func TestAPI_AuthOverflowIPBucket(t *testing.T) {
 
 	api.LoginLimit = 10
 	api.PasswordLimit = 10
-	api.IPLimit = 1 // limit 1 try in minute for each IP
+	api.IPLimit = 1 // limit 1 try in minute for each IPBits
 
 	ip := entities.IP("127.0.0.1")
 
@@ -522,7 +522,7 @@ func TestAPI_AuthNotOverflowIPBucket(t *testing.T) {
 
 	api.LoginLimit = 10
 	api.PasswordLimit = 10
-	api.IPLimit = 1 // limit 1 try in minute for each IP
+	api.IPLimit = 1 // limit 1 try in minute for each IPBits
 
 	// deterministic timing
 	nowTime := time.Now()

@@ -2,13 +2,17 @@ FROM golang:1.13 as builder
 WORKDIR /app
 COPY . .
 
-RUN cd test/integration/grpc/tests \
-    && CGO_ENABLED=0 GOOS=linux go test -v -c -o tests ./...
+RUN cd test/integration \
+    && CGO_ENABLED=0 GOOS=linux go test -v -c -o grpc-tests ./grpc/tests/... \
+    && CGO_ENABLED=0 GOOS=linux go test -v -c -o ip-tests ./ip/...
 
 FROM alpine:latest
+
 RUN apk --no-cache  add \
     ca-certificates \
     tzdata \
     && cp /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+
 WORKDIR /root/
-COPY --from=builder /app/test/integration/grpc/tests/tests .
+
+COPY --from=builder /app/test/integration/*-tests ./ \

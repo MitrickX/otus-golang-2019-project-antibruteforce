@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 )
 
@@ -64,6 +65,20 @@ func (ip IP) HasMaskPart() bool {
 	return len(parts) > 1
 }
 
+func (ip IP) GetMaskPart() string {
+	parts := strings.Split(string(ip), "/")
+	if len(parts) > 1 {
+		return parts[1]
+	}
+
+	return ""
+}
+
+func (ip IP) GetMaskAsInt() (int, error) {
+	mask := ip.GetMaskPart()
+	return strconv.Atoi(mask)
+}
+
 func (ip IP) ParseAsCIDR() (net.IP, *net.IPNet, error) {
 	return net.ParseCIDR(string(ip))
 }
@@ -96,13 +111,13 @@ func (ip IP) IsConform(checkedIP IP) bool {
 
 // Ip list interface
 type IPList interface {
-	// Add IP into list
+	// Add IPBits into list
 	Add(ctx context.Context, ip IP) error
-	// Delete IP from list
+	// Delete IPBits from list
 	Delete(ctx context.Context, ip IP) error
-	// Has list this IP
+	// Has list this IPBits
 	Has(ctx context.Context, ip IP) (bool, error)
-	// Is IP conformed list. More broader concept than Has - checking matching among subnet IPs in list
+	// Is IPBits conformed list. More broader concept than Has - checking matching among subnet IPs in list
 	IsConform(ctx context.Context, ip IP) (bool, error)
 	// How many IPs in list
 	Count(ctx context.Context) (int, error)

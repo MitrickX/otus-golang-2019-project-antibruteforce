@@ -126,7 +126,7 @@ func TestIP_Parse(t *testing.T) {
 
 	netIP := ip.Parse()
 	if netIP.String() != string(ip) {
-		t.Fatalf("unexpected result of conveerting net.IP `%#v` to string `%s` instreadof `%s`",
+		t.Fatalf("unexpected result of conveerting net.IPBits `%#v` to string `%s` instreadof `%s`",
 			netIP,
 			netIP.String(),
 			ip,
@@ -150,7 +150,7 @@ func TestIP_ParseAsCIDR1(t *testing.T) {
 	}
 
 	if maskIP.IP.String() != string(ip.DropMaskPart()) {
-		t.Fatalf("unexpected that maskIP.IP %s not equals ip after drop mask %s",
+		t.Fatalf("unexpected that maskIP.IPBits %s not equals ip after drop mask %s",
 			netIP.String(),
 			ip.DropMaskPart(),
 		)
