@@ -11,6 +11,7 @@ import (
 
 var logger *zap.SugaredLogger
 
+// InitLogger inits logger by viper (get "logger" section of config and init new logger)
 func InitLogger(v *viper.Viper) {
 	zapConfig := zap.NewProductionConfig()
 
@@ -86,6 +87,7 @@ OUTER:
 	return resultPaths
 }
 
+// GetLogger returns singleton logger for whole app
 func GetLogger() *zap.SugaredLogger {
 	if logger == nil {
 		log.Fatal("Logger is not inited")

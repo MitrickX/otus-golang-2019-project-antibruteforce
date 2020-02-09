@@ -10,8 +10,10 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// DefaultConnectRetries is default connect retries
 const DefaultConnectRetries = 5
 
+// Config for connect to DB
 type Config struct {
 	Host           string
 	Port           string
@@ -21,6 +23,7 @@ type Config struct {
 	ConnectRetries int
 }
 
+// NewConfigByEnv construct config by env vars
 func NewConfigByEnv() Config {
 	retries, err := strconv.Atoi(os.Getenv("DB_CONNECT_RETRIES"))
 	if err != nil {
@@ -37,6 +40,7 @@ func NewConfigByEnv() Config {
 	}
 }
 
+// Connect to DB by this config
 func Connect(cfg Config) (*sqlx.DB, error) {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
 		cfg.User,
@@ -71,6 +75,7 @@ func Connect(cfg Config) (*sqlx.DB, error) {
 	return db, nil
 }
 
+// IsTableExists checks does table exist in this DB
 func IsTableExists(ctx context.Context, db *sqlx.DB, dbName string, tableName string) (bool, error) {
 	query := `SELECT EXISTS(
     	SELECT * 

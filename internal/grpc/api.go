@@ -18,18 +18,22 @@ import (
 )
 
 const (
-	DefaultLoginBucketLimit    = 10
+	// DefaultLoginBucketLimit is default value of rate (in minute) for login buckets
+	DefaultLoginBucketLimit = 10
+	// DefaultPasswordBucketLimit is default value of rate (in minute) for password buckets
 	DefaultPasswordBucketLimit = 100
-	DefaultIPBucketLimit       = 1000
+	// DefaultIPBucketLimit is default value of rate (in minute) for IP buckets
+	DefaultIPBucketLimit = 1000
 )
 
-// Bucket limits config
+// LimitsConfig is set of limits of all types of buckets
 type LimitsConfig struct {
 	LoginLimit    uint
 	PasswordLimit uint
 	IPLimit       uint
 }
 
+// NewLimitsConfigByViper constructs new LimitConfig by viper (get from "limits" section of app config)
 func NewLimitsConfigByViper(v *viper.Viper) LimitsConfig {
 	limits := v.GetStringMapString("limits")
 
@@ -40,19 +44,20 @@ func NewLimitsConfigByViper(v *viper.Viper) LimitsConfig {
 	}
 }
 
-// Set of buckets storages
+// StorageSet struct represents set of buckets storages
 type StorageSet struct {
 	LoginStorage    entities.BucketStorage
 	PasswordStorage entities.BucketStorage
 	IPStorage       entities.BucketStorage
 }
 
+// ListSet struct represents set of IP lists (black and white)
 type ListSet struct {
 	BlackList entities.IPList
 	WhiteList entities.IPList
 }
 
-// GRPC API struct
+// API is GRPC API server
 type API struct {
 	LimitsConfig
 	StorageSet
@@ -60,6 +65,7 @@ type API struct {
 	nowTimeFn func() time.Time
 }
 
+// NewAPIByViper constructs new API data type by viper app config and connection to DB
 func NewAPIByViper(v *viper.Viper, db *sqlx.DB) *API {
 	api := &API{
 		LimitsConfig: NewLimitsConfigByViper(v),
@@ -77,6 +83,7 @@ func NewAPIByViper(v *viper.Viper, db *sqlx.DB) *API {
 	return api
 }
 
+// Run runs GRPC API server on port
 func (a *API) Run(port string) error {
 	s := grpc.NewServer()
 
@@ -96,6 +103,7 @@ func (a *API) Run(port string) error {
 	return nil
 }
 
+// AddInBlackList adds IP in black list
 func (a *API) AddInBlackList(ctx context.Context, request *IPRequest) (*None, error) {
 	ip, err := entities.New(request.Ip)
 	if err != nil {
@@ -110,6 +118,7 @@ func (a *API) AddInBlackList(ctx context.Context, request *IPRequest) (*None, er
 	return &None{}, nil
 }
 
+// AddInWhiteList adds IP in white list
 func (a *API) AddInWhiteList(ctx context.Context, request *IPRequest) (*None, error) {
 	ip, err := entities.New(request.Ip)
 	if err != nil {
@@ -124,6 +133,7 @@ func (a *API) AddInWhiteList(ctx context.Context, request *IPRequest) (*None, er
 	return &None{}, nil
 }
 
+// DeleteFromBlackList deletes IP from black list
 func (a *API) DeleteFromBlackList(ctx context.Context, request *IPRequest) (*None, error) {
 	ip, err := entities.New(request.Ip)
 	if err != nil {
@@ -138,6 +148,7 @@ func (a *API) DeleteFromBlackList(ctx context.Context, request *IPRequest) (*Non
 	return &None{}, nil
 }
 
+// DeleteFromWhiteList deletes IP from white list
 func (a *API) DeleteFromWhiteList(ctx context.Context, request *IPRequest) (*None, error) {
 	ip, err := entities.New(request.Ip)
 	if err != nil {
@@ -152,6 +163,7 @@ func (a *API) DeleteFromWhiteList(ctx context.Context, request *IPRequest) (*Non
 	return &None{}, nil
 }
 
+// ClearBucket clear bucket for login/password/IP
 func (a *API) ClearBucket(ctx context.Context, request *BucketRequest) (*None, error) {
 	var err error
 
@@ -184,6 +196,7 @@ func (a *API) ClearBucket(ctx context.Context, request *BucketRequest) (*None, e
 	return &None{}, nil
 }
 
+// Auth checks it is allowed to auth by this params (login, password, IP)
 func (a *API) Auth(ctx context.Context, request *AuthRequest) (*OkResponse, error) {
 	var err error
 
@@ -244,6 +257,7 @@ func (a *API) Auth(ctx context.Context, request *AuthRequest) (*OkResponse, erro
 	return &OkResponse{Ok: conform}, nil
 }
 
+// ClearBlackList clear black list of IPs
 func (a *API) ClearBlackList(ctx context.Context, _ *None) (*None, error) {
 	err := a.BlackList.Clear(ctx)
 	if err != nil {
@@ -253,6 +267,7 @@ func (a *API) ClearBlackList(ctx context.Context, _ *None) (*None, error) {
 	return &None{}, nil
 }
 
+// ClearWhiteList clear white list of IPs
 func (a *API) ClearWhiteList(ctx context.Context, _ *None) (*None, error) {
 	err := a.WhiteList.Clear(ctx)
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// LeakyBucket data structure, implements Bucket interface
 type LeakyBucket struct {
 	increment time.Duration // I
 	limit     time.Duration // L
@@ -13,10 +14,12 @@ type LeakyBucket struct {
 	mx        sync.Mutex    // avoid race
 }
 
+// NewLeakyBucket constructor
 func NewLeakyBucket(increment time.Duration, limit time.Duration) *LeakyBucket {
 	return &LeakyBucket{increment: increment, limit: limit, lct: -1}
 }
 
+// IsConform checks is packet conform bucket
 func (b *LeakyBucket) IsConform(t time.Time) bool {
 	b.mx.Lock()
 	defer b.mx.Unlock()

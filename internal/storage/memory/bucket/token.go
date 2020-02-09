@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// TokenBucket structure, implements Bucket interface and "Buckets of token" data structure
 type TokenBucket struct {
 	count    uint          // count of tokens in bucket
 	duration time.Duration // duration in which release one token (increment count)
@@ -13,6 +14,7 @@ type TokenBucket struct {
 	mx       sync.Mutex    // avoid race
 }
 
+// NewTokenBucket construct new TokenBucket structure by limit and duration
 func NewTokenBucket(limit uint, duration time.Duration) *TokenBucket {
 	return &TokenBucket{
 		count:    limit,
@@ -21,11 +23,13 @@ func NewTokenBucket(limit uint, duration time.Duration) *TokenBucket {
 	}
 }
 
+// NewTokenBucketByLimitInMinute construct new TokenBucket structure by rate in minute
 func NewTokenBucketByLimitInMinute(limit uint) *TokenBucket {
 	d := time.Minute / time.Duration(limit)
 	return NewTokenBucket(limit, d)
 }
 
+// IsConform checks is packet conform bucket
 func (b *TokenBucket) IsConform(t time.Time) bool {
 	b.mx.Lock()
 	defer b.mx.Unlock()

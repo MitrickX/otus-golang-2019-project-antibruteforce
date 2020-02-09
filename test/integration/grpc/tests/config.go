@@ -17,12 +17,15 @@ import (
 )
 
 const (
-	DefaultGRPCPort    = "50051"
+	// DefaultGRPCPort is default port to connect to GRPC server
+	DefaultGRPCPort = "50051"
+	// DefaultCfgFilePath is default path of app config
 	DefaultCfgFilePath = "../../../../configs/config.yml"
 )
 
 var cfg *Config
 
+// Config type fo gprc integration tests
 type Config struct {
 	grpcAPI.LimitsConfig
 	apiClient   grpcAPI.ApiClient
@@ -133,6 +136,7 @@ func newAPIClient(addr string) (grpcAPI.ApiClient, error) {
 	return grpcAPI.NewApiClient(conn), nil
 }
 
+// GetConfig return singleton config for grpc integration tests
 func GetConfig() *Config {
 	return cfg
 }

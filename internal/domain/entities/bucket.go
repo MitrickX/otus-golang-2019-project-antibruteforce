@@ -5,10 +5,13 @@ import (
 	"time"
 )
 
+// Bucket interface, bucket is abstraction that implements rate limit conception
 type Bucket interface {
+	// IsConform checks is packet conform bucket
 	IsConform(t time.Time) bool
 }
 
+// BucketStorage interface, interface for data struct where we keep buckets by keys
 type BucketStorage interface {
 	// Add bucket into storage by key
 	Add(ctx context.Context, bucket Bucket, key interface{}) error
@@ -18,6 +21,6 @@ type BucketStorage interface {
 	Get(ctx context.Context, key interface{}) (Bucket, error)
 	// Has storage bucket by key?
 	Has(ctx context.Context, key interface{}) (bool, error)
-	// Total count of buckets in storage
+	// Count of total number of buckets in storage
 	Count(ctx context.Context) (int, error)
 }

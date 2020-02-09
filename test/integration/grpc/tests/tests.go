@@ -16,6 +16,7 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Methods names of grpc server
 const (
 	AddInBlackListMethodName      = "AddInBlackList"
 	AddInWhiteListMethodName      = "AddInWhiteList"

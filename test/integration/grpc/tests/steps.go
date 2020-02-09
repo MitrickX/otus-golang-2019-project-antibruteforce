@@ -15,6 +15,7 @@ import (
 	"github.com/DATA-DOG/godog"
 )
 
+// Kinds for IP lists
 const (
 	BlackKind = "black"
 	WhiteKind = "white"
@@ -260,6 +261,7 @@ func (t *featureTest) waitMinute(n int) error {
 	return nil
 }
 
+// FeatureContext for godog Suite of tests
 func FeatureContext(s *godog.Suite, t *featureTest) {
 	s.Step(`^Clean bucket for$`, t.cleanBucketFor)
 	s.Step(`^Clean "([^"]*)" list$`, t.cleanList)

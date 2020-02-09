@@ -12,9 +12,10 @@ import (
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
 )
 
-// For save into DB column of type BIT or BIT VARYING
+// BitMask type for save into DB column of type BIT or BIT VARYING
 type BitMask string
 
+// Row type represent row in ip list table
 type Row struct {
 	IPBits   BitMask     `db:"ip"`
 	MaskBits *BitMask    `db:"mask"` // pointer because could be nil (NULL)
@@ -24,11 +25,13 @@ type Row struct {
 	Kind     string      `db:"kind"`
 }
 
+// List type that hold IPs and implement IPList interface
 type List struct {
 	db   *sqlx.DB
 	kind string // to identify list, (for this program is "black" and "white")
 }
 
+// NewList construct new list of IPs that drives on ip list table in DB
 func NewList(db *sqlx.DB, kind string) *List {
 	return &List{
 		db:   db,
@@ -36,6 +39,7 @@ func NewList(db *sqlx.DB, kind string) *List {
 	}
 }
 
+// Add IP into list
 func (l *List) Add(ctx context.Context, ip entities.IP) error {
 	// Check if this IP already in DB, it is forbid has 2 same IPs in DB, violet primary key constraint
 	has, err := l.Has(ctx, ip)
@@ -64,6 +68,7 @@ func (l *List) Add(ctx context.Context, ip entities.IP) error {
 	return nil
 }
 
+// Delete IP from list
 func (l *List) Delete(ctx context.Context, ip entities.IP) error {
 	row, err := convertIPToRow(ip, l.kind)
 	if err != nil {
@@ -82,6 +87,7 @@ func (l *List) Delete(ctx context.Context, ip entities.IP) error {
 	return nil
 }
 
+// Has list this IP
 func (l *List) Has(ctx context.Context, ip entities.IP) (bool, error) {
 	row, err := convertIPToRow(ip, l.kind)
 	if err != nil {
@@ -110,6 +116,7 @@ func (l *List) Has(ctx context.Context, ip entities.IP) (bool, error) {
 	return count > 0, nil
 }
 
+// IsConform check is IP conformed list
 func (l *List) IsConform(ctx context.Context, ip entities.IP) (bool, error) {
 	if ip.HasMaskPart() {
 		return false, wrapConformError(l.kind, ip, errors.New("expected pure IPBits (without mask)"))
@@ -162,6 +169,7 @@ func (l *List) IsConform(ctx context.Context, ip entities.IP) (bool, error) {
 	return resIP != "", err
 }
 
+// Count how many IPs in list
 func (l *List) Count(ctx context.Context) (int, error) {
 	query := `SELECT COUNT(*) FROM ip_list WHERE kind = $1`
 
@@ -177,6 +185,7 @@ func (l *List) Count(ctx context.Context) (int, error) {
 	return count, nil
 }
 
+// Clear all IPs in list
 func (l *List) Clear(ctx context.Context) error {
 	query := `DELETE FROM ip_list WHERE kind = $1`
 
@@ -255,6 +264,7 @@ func buildFindIPCondition(row Row) string {
 
 	return condition
 }
+
 func wrapAddError(kind string, err error) error {
 	return fmt.Errorf("failed to add IPBits in list %s: %w", kind, err)
 }
