@@ -10,12 +10,14 @@ import (
 )
 
 type emptyBucket struct {
-	id int64
+	id       int64
+	isActive bool
 }
 
-func newEmptyBucket() emptyBucket {
+func newEmptyBucket(isActive bool) emptyBucket {
 	return emptyBucket{
-		id: rand.Int63(),
+		id:       rand.Int63(),
+		isActive: isActive,
 	}
 }
 
@@ -23,18 +25,22 @@ func (e emptyBucket) IsConform(t time.Time) bool {
 	return true
 }
 
+func (e emptyBucket) IsActive(t time.Time) bool {
+	return e.isActive
+}
+
 func TestStorage_Add(t *testing.T) {
 	storage := NewStorage()
 
 	var err error
 
-	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.1"))
+	err = storage.Add(context.Background(), newEmptyBucket(true), entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
-	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.2"))
+	err = storage.Add(context.Background(), newEmptyBucket(true), entities.IP("127.0.0.2"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.2`")
 
-	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.1"))
+	err = storage.Add(context.Background(), newEmptyBucket(true), entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1` (2nd time)")
 
 	cnt, err := storage.Count(context.Background())
@@ -46,10 +52,10 @@ func TestStorage_Delete(t *testing.T) {
 
 	var err error
 
-	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.1"))
+	err = storage.Add(context.Background(), newEmptyBucket(true), entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
-	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.2"))
+	err = storage.Add(context.Background(), newEmptyBucket(true), entities.IP("127.0.0.2"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.2`")
 
 	// Delete not existing
@@ -73,8 +79,8 @@ func TestStorage_Get(t *testing.T) {
 	bucket, err = storage.Get(context.Background(), entities.IP("127.0.0.1"))
 	assertOkBucketGetResult(t, nil, bucket, err, "get bucket from empty storage")
 
-	expectedBucket1 := newEmptyBucket()
-	expectedBucket2 := newEmptyBucket()
+	expectedBucket1 := newEmptyBucket(true)
+	expectedBucket2 := newEmptyBucket(true)
 
 	err = storage.Add(context.Background(), expectedBucket1, entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
@@ -96,7 +102,7 @@ func TestStorage_Has(t *testing.T) {
 
 	var err error
 
-	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.1"))
+	err = storage.Add(context.Background(), newEmptyBucket(true), entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
 	ok, err = storage.Has(context.Background(), entities.IP("127.0.0.1"))
@@ -125,13 +131,13 @@ func TestStorage_Count(t *testing.T) {
 	cnt, err = storage.Count(context.Background())
 	assertCountResult(t, 0, cnt, err, "count")
 
-	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.1"))
+	err = storage.Add(context.Background(), newEmptyBucket(true), entities.IP("127.0.0.1"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.1`")
 
 	cnt, err = storage.Count(context.Background())
 	assertCountResult(t, 1, cnt, err, "count")
 
-	err = storage.Add(context.Background(), newEmptyBucket(), entities.IP("127.0.0.2"))
+	err = storage.Add(context.Background(), newEmptyBucket(true), entities.IP("127.0.0.2"))
 	assertNotErrorResult(t, err, "add bucket for ip `127.0.0.2`")
 
 	cnt, err = storage.Count(context.Background())
@@ -148,6 +154,22 @@ func TestStorage_Count(t *testing.T) {
 
 	cnt, err = storage.Count(context.Background())
 	assertCountResult(t, 0, cnt, err, "count")
+}
+
+func TestStorage_ClearNotActive(t *testing.T) {
+	storage := NewStorage()
+
+	_ = storage.Add(context.Background(), newEmptyBucket(true), "a")
+	_ = storage.Add(context.Background(), newEmptyBucket(true), "b")
+	_ = storage.Add(context.Background(), newEmptyBucket(false), "c")
+	_ = storage.Add(context.Background(), newEmptyBucket(true), "d")
+	_ = storage.Add(context.Background(), newEmptyBucket(false), "e")
+	_ = storage.Add(context.Background(), newEmptyBucket(true), "f")
+
+	cnt, _ := storage.ClearNotActive(context.Background(), time.Now())
+	if cnt != 2 { //nolint:gomnd
+		t.Fatalf("unexpected count of deleted buckets after cleaning %d instead of %d", cnt, 2)
+	}
 }
 
 func assertNotErrorResult(t *testing.T, err error, prefix string) {

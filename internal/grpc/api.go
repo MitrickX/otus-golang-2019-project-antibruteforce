@@ -357,7 +357,7 @@ func getBucketFromStorage(ctx context.Context, storage entities.BucketStorage,
 
 	// bucket not exist yet
 	if b == nil {
-		b = bucket.NewTokenBucketByLimitInMinute(limit)
+		b = bucket.NewTokenBucketByLimitInMinute(time.Now(), limit, time.Minute)
 
 		err = storage.Add(ctx, b, key)
 		if err != nil {

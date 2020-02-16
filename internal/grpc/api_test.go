@@ -178,7 +178,10 @@ func TestAPI_ClearBucketForLogin(t *testing.T) {
 	//nolint:gomnd
 	limit := 10
 
-	err := api.LoginStorage.Add(context.Background(), bucket.NewTokenBucketByLimitInMinute(uint(limit)), "test")
+	err := api.LoginStorage.Add(
+		context.Background(),
+		bucket.NewTokenBucketByLimitInMinute(time.Now(), uint(limit), time.Minute),
+		"test")
 	assertNotErrorResult(t, err, "add new bucket for login `test`")
 
 	_, err = client.ClearBucket(context.Background(), &BucketRequest{Login: "test"})
@@ -195,7 +198,10 @@ func TestAPI_ClearBucketForPassword(t *testing.T) {
 	//nolint:gomnd
 	limit := 10
 
-	err := api.PasswordStorage.Add(context.Background(), bucket.NewTokenBucketByLimitInMinute(uint(limit)), "1234")
+	err := api.PasswordStorage.Add(
+		context.Background(),
+		bucket.NewTokenBucketByLimitInMinute(time.Now(), uint(limit), time.Minute),
+		"1234")
 	assertNotErrorResult(t, err, "add new bucket for password `1234`")
 
 	_, err = client.ClearBucket(context.Background(), &BucketRequest{Password: "1234"})
@@ -213,7 +219,7 @@ func TestAPI_ClearBucketForIP(t *testing.T) {
 
 	err := api.IPStorage.Add(
 		context.Background(),
-		bucket.NewTokenBucketByLimitInMinute(uint(limit)),
+		bucket.NewTokenBucketByLimitInMinute(time.Now(), uint(limit), time.Minute),
 		entities.IP("127.0.0.1"),
 	)
 	assertNotErrorResult(t, err, "add new bucket for IPBits `127.0.0.1`")

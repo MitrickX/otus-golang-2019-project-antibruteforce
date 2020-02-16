@@ -4,6 +4,9 @@ limits:
   password: 100
   ip: 1000
 
+timeouts:
+  bucket_active: "2m"
+
 logger:
   level: "debug"
   output_paths:

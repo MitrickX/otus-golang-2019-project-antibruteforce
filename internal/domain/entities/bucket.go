@@ -9,6 +9,8 @@ import (
 type Bucket interface {
 	// IsConform checks is packet conform bucket
 	IsConform(t time.Time) bool
+	// IsActive checks if bucket active to this time
+	IsActive(t time.Time) bool
 }
 
 // BucketStorage interface, interface for data struct where we keep buckets by keys
@@ -23,4 +25,6 @@ type BucketStorage interface {
 	Has(ctx context.Context, key interface{}) (bool, error)
 	// Count of total number of buckets in storage
 	Count(ctx context.Context) (int, error)
+	// ClearNotActive clear not active to current time buckets from storage
+	ClearNotActive(ctx context.Context, t time.Time) (int, error)
 }

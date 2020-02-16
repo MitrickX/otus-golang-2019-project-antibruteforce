@@ -31,7 +31,7 @@ func (c *counter) val() int {
 // Test that first packet is conform
 func TestTokenBucket_ConformFirst(t *testing.T) {
 	N := 10
-	bucket := NewTokenBucketByLimitInMinute(uint(N))
+	bucket := NewTokenBucketByLimitInMinute(time.Now(), uint(N), time.Minute)
 
 	conform := bucket.IsConform(time.Now())
 	if !conform {
@@ -69,7 +69,7 @@ func TestTokenBucket_ConformWithBigTimeoutStep(t *testing.T) {
 func testConformWithTimeoutStep(t *testing.T, timeout time.Duration, prefix string) {
 	now := time.Unix(0, 0)
 	N := 10
-	bucket := NewTokenBucketByLimitInMinute(uint(N))
+	bucket := NewTokenBucketByLimitInMinute(time.Now(), uint(N), time.Minute)
 
 	for i := 0; i < N; i++ {
 		conform := bucket.IsConform(now.Add(time.Duration(i) * timeout))
@@ -92,7 +92,7 @@ func TestTokenBucket_ConformAllAtOnceConcurrently(t *testing.T) {
 	now := time.Now()
 
 	N := 10
-	bucket := NewTokenBucketByLimitInMinute(uint(N))
+	bucket := NewTokenBucketByLimitInMinute(time.Now(), uint(N), time.Minute)
 
 	// counter - number'
 	conformCount := newCounter(0)
@@ -131,7 +131,7 @@ func TestTokenBucket_ConformAllAtOnceConcurrently(t *testing.T) {
 func TestTokenBucket_ConformAfterNeedDuration(t *testing.T) {
 	now := time.Now()
 	N := 10
-	bucket := NewTokenBucketByLimitInMinute(uint(N))
+	bucket := NewTokenBucketByLimitInMinute(time.Now(), uint(N), time.Minute)
 
 	for i := 0; i < N; i++ {
 		conform := bucket.IsConform(now)
@@ -153,7 +153,7 @@ func TestTokenBucket_ConformAfterNeedDuration(t *testing.T) {
 
 func TestTokenBucket_Release(t *testing.T) {
 	N := 10
-	bucket := NewTokenBucketByLimitInMinute(uint(N))
+	bucket := NewTokenBucketByLimitInMinute(time.Now(), uint(N), time.Minute)
 
 	nowTime := time.Now()
 
@@ -183,5 +183,57 @@ func TestTokenBucket_Release(t *testing.T) {
 		if count < uint(N-1) {
 			t.Fatal("tokens in bucket must be plenty cause of slow arrival rates")
 		}
+	}
+}
+
+func TestTokenBucket_IsActiveWhenIsConformNotCalled(t *testing.T) {
+	N := 10
+	bucket := NewTokenBucketByLimitInMinute(time.Now(), uint(N), time.Minute)
+
+	if bucket.IsActive(time.Now()) == false {
+		t.Fatalf("bucket must be active right after construction")
+	}
+
+	nextTime := time.Now().Add(time.Minute).Add(time.Millisecond)
+	if bucket.IsActive(nextTime) == true {
+		t.Fatalf("bucket must be not active after wait timeout after constructor")
+	}
+}
+
+func TestTokenBucket_IsActiveRightAfterIsConformCalled(t *testing.T) {
+	N := 10
+
+	nowTime := time.Now()
+	bucket := NewTokenBucketByLimitInMinute(nowTime, uint(N), time.Minute)
+
+	nextTime := time.Now().Add(time.Minute).Add(time.Millisecond)
+	bucket.IsConform(nextTime)
+
+	if bucket.IsActive(nextTime) == false {
+		t.Fatalf("bucket must be active right after IsConform called")
+	}
+}
+
+func TestTokenBucket_IsActiveAfterIsConformCalled(t *testing.T) {
+	N := 10
+
+	nowTime := time.Now()
+	bucket := NewTokenBucketByLimitInMinute(nowTime, uint(N), time.Minute)
+
+	nextTime := time.Now().Add(time.Minute)
+	bucket.IsConform(nextTime)
+
+	// bucket restored, but active timeout is not passed so bucket still active
+	nextTime = nextTime.Add(59 * time.Second) //nolint:gomnd
+
+	if bucket.IsActive(nextTime) == false {
+		t.Fatalf("bucket must be active, because active timeout is not passed")
+	}
+
+	// active timeout is now passed so bucket must be not active
+	nextTime = nextTime.Add(time.Second).Add(time.Millisecond)
+
+	if bucket.IsActive(nextTime) == true {
+		t.Fatalf("bucket must not be active, because active timeout is passed")
 	}
 }

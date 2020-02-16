@@ -3,6 +3,7 @@ package bucket
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
 )
@@ -67,4 +68,21 @@ func (s *Storage) Count(context.Context) (int, error) {
 	defer s.mx.RUnlock()
 
 	return len(s.m), nil
+}
+
+// ClearNotActive clear not active to current time buckets from storage
+func (s *Storage) ClearNotActive(ctx context.Context, t time.Time) (int, error) {
+	s.mx.Lock()
+	defer s.mx.Unlock()
+
+	cnt := 0 // how many not active bucket will be deleted from storage
+
+	for key, bucket := range s.m {
+		if !bucket.IsActive(t) {
+			delete(s.m, key)
+			cnt++
+		}
+	}
+
+	return cnt, nil
 }
