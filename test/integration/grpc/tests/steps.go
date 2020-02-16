@@ -37,6 +37,7 @@ func (t *featureTest) iCallMethodWithParams(methodName string, params *gherkin.D
 
 func (t *featureTest) iCallTimesMethodWithParams(times, methodName string, params *gherkin.DocString) error {
 	n, err := stringTimesToInt(times)
+
 	if err != nil {
 		return fmt.Errorf("couldn't convert string `times` to int %s", err)
 	}
@@ -49,9 +50,6 @@ func (t *featureTest) iCallIntTimesMethodWithParams(times int, methodName string
 		return fmt.Errorf("unexpected method %s", methodName)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
-	defer cancel()
-
 	if isIPListMethod(methodName) {
 		method := getIPListMethodByName(methodName)
 		if method == nil {
@@ -62,6 +60,9 @@ func (t *featureTest) iCallIntTimesMethodWithParams(times int, methodName string
 		if err != nil {
 			return fmt.Errorf("couldn't convert input params to ip request %s", err)
 		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
+		defer cancel()
 
 		_, err = method(ctx, request)
 		t.responseErrors = []error{err}
@@ -78,14 +79,33 @@ func (t *featureTest) iCallIntTimesMethodWithParams(times int, methodName string
 			return fmt.Errorf("couldn't convert input params to bucket request %s", err)
 		}
 
+		ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
+		defer cancel()
+
 		_, err = apiClient.ClearBucket(ctx, request)
 		t.responseErrors = []error{err}
 
 		return nil
 	}
 
+	// times loop only make sense for auth request
+	return t.iCallIntTimesAuthMethodWithParams(times, params)
+}
+
+func (t *featureTest) iCallIntTimesAuthMethodWithParams(times int, params *gherkin.DocString) error {
+	cfg := GetConfig()
+	apiClient := cfg.apiClient
+
 	t.responseErrors = nil
 	t.okResponses = nil
+
+	var cancel context.CancelFunc
+
+	defer func() {
+		if cancel != nil {
+			cancel()
+		}
+	}()
 
 	for i := 0; i < times; i++ {
 		request, err := docStringToAuthRequest(params)
@@ -93,7 +113,13 @@ func (t *featureTest) iCallIntTimesMethodWithParams(times int, methodName string
 			return fmt.Errorf("couldn't convert input params to auth request %s", err)
 		}
 
+		var ctx context.Context
+		ctx, cancel = context.WithTimeout(context.Background(), cfg.timeout)
+
 		okResponse, err := apiClient.Auth(ctx, request)
+
+		cancel()
+
 		t.responseErrors = append(t.responseErrors, err)
 		t.okResponses = append(t.okResponses, okResponse)
 	}
