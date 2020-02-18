@@ -11,7 +11,7 @@ logger:
   level: "debug"
   output_paths:
     - stderr
-    - /tmp/calendar/outlog
+    - /tmp/antibruteforce/outlog
   error_output_paths:
     - stderr
-    - /tmp/calendar/errlog
+    - /tmp/antibruteforce/errlog

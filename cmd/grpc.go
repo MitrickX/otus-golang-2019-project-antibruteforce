@@ -64,7 +64,7 @@ func runGRPCServer() {
 		l.Fatal(err)
 	}
 
-	err = grpcAPI.NewAPIByViper(viper.GetViper(), db).Run(port)
+	err = grpcAPI.NewAPIByViper(viper.GetViper(), db, l).Run(port)
 	if err != nil {
 		l.Fatal(err)
 	}

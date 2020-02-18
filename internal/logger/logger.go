@@ -14,8 +14,8 @@ var logger *zap.SugaredLogger
 // InitLogger inits logger by viper (get "logger" section of config and init new logger)
 func InitLogger(v *viper.Viper) {
 	zapConfig := zap.NewProductionConfig()
-
 	loggerCfg := v.GetStringMap("logger")
+
 	if val, ok := loggerCfg["level"]; ok {
 		if level, okCast := val.(string); okCast {
 			// if level unrecognized, just will use NewProductionConfig level, so ignore error

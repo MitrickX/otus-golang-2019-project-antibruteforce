@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/domain/entities"
 	"github.com/mitrickx/otus-golang-2019-project-antibruteforce/internal/storage/memory/bucket"
@@ -24,6 +26,8 @@ const (
 	DefaultPasswordBucketLimit = 100
 	// DefaultIPBucketLimit is default value of rate (in minute) for IP buckets
 	DefaultIPBucketLimit = 1000
+	// DefaultBucketActiveTimeout is default value of bucket active timeout
+	DefaultBucketActiveTimeout = 2 * time.Minute
 )
 
 // LimitsConfig is set of limits of all types of buckets
@@ -62,11 +66,16 @@ type API struct {
 	LimitsConfig
 	StorageSet
 	ListSet
-	nowTimeFn func() time.Time
+	bucketActiveTimeout time.Duration
+	logger              *zap.SugaredLogger
+	nowTimeFn           func() time.Time
 }
 
 // NewAPIByViper constructs new API data type by viper app config and connection to DB
-func NewAPIByViper(v *viper.Viper, db *sqlx.DB) *API {
+func NewAPIByViper(v *viper.Viper, db *sqlx.DB, logger *zap.SugaredLogger) *API {
+	timeouts := v.GetStringMapString("timeouts")
+	bucketActiveTimeout := getDurationFromStringMap(timeouts, "bucket_active", DefaultBucketActiveTimeout)
+
 	api := &API{
 		LimitsConfig: NewLimitsConfigByViper(v),
 		StorageSet: StorageSet{
@@ -78,6 +87,8 @@ func NewAPIByViper(v *viper.Viper, db *sqlx.DB) *API {
 			BlackList: ip.NewList(db, "black"),
 			WhiteList: ip.NewList(db, "white"),
 		},
+		bucketActiveTimeout: bucketActiveTimeout,
+		logger:              logger,
 	}
 
 	return api
@@ -85,6 +96,11 @@ func NewAPIByViper(v *viper.Viper, db *sqlx.DB) *API {
 
 // Run runs GRPC API server on port
 func (a *API) Run(port string) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	a.runBucketStorageCleaner(ctx)
+
 	s := grpc.NewServer()
 
 	l, err := net.Listen("tcp", ":"+port)
@@ -277,6 +293,34 @@ func (a *API) ClearWhiteList(ctx context.Context, _ *None) (*None, error) {
 	return &None{}, nil
 }
 
+// CountBuckets get all counts of all type of buckets
+func (a *API) CountBuckets(ctx context.Context, _ *None) (*BucketCountsResponse, error) {
+	var err error
+
+	var loginCount, passwordCount, ipCount int
+
+	loginCount, err = a.LoginStorage.Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	passwordCount, err = a.PasswordStorage.Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	ipCount, err = a.IPStorage.Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &BucketCountsResponse{
+		Login:    uint32(loginCount),
+		Password: uint32(passwordCount),
+		Ip:       uint32(ipCount),
+	}, nil
+}
+
 func (a *API) isConformByWhiteList(ctx context.Context, ip entities.IP) (bool, error) {
 	return a.WhiteList.IsConform(ctx, ip)
 }
@@ -336,6 +380,33 @@ func (a *API) getLoginBucket(ctx context.Context, login string) (entities.Bucket
 	return getBucketFromStorage(ctx, a.LoginStorage, login, a.LoginLimit)
 }
 
+func (a *API) runBucketStorageCleaner(ctx context.Context) {
+	go func() {
+		ticker := time.NewTicker(a.bucketActiveTimeout)
+
+	OUTER:
+		for {
+			select {
+			case <-ticker.C:
+				loginBucketsCount, _ := a.LoginStorage.ClearNotActive(ctx, a.now())
+				passwordBucketsCount, _ := a.PasswordStorage.ClearNotActive(ctx, a.now())
+				ipBucketsCount, _ := a.IPStorage.ClearNotActive(ctx, a.now())
+
+				a.logDebugF("API.StorageCleaner: %d/%d/%d", loginBucketsCount, passwordBucketsCount, ipBucketsCount)
+
+			case <-ctx.Done():
+				break OUTER
+			}
+		}
+	}()
+}
+
+func (a *API) logDebugF(template string, args ...interface{}) {
+	if a.logger != nil {
+		a.logger.Debugf(template, args...)
+	}
+}
+
 func (a *API) now() time.Time {
 	if a.nowTimeFn == nil {
 		a.nowTimeFn = time.Now
@@ -389,4 +460,18 @@ func getUintFromStringMap(m map[string]string, key string, defaultVal uint) uint
 	}
 
 	return uint(valInt)
+}
+
+func getDurationFromStringMap(m map[string]string, key string, defaultVal time.Duration) time.Duration {
+	val, ok := m[key]
+	if !ok {
+		return defaultVal
+	}
+
+	valDuration, err := time.ParseDuration(val)
+	if err != nil {
+		return defaultVal
+	}
+
+	return valDuration
 }

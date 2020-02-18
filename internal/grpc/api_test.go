@@ -19,6 +19,12 @@ import (
 var bufConnSize = 4096
 
 func newTestAPI() *API {
+	limits := LimitsConfig{
+		LoginLimit:    DefaultLoginBucketLimit,
+		PasswordLimit: DefaultPasswordBucketLimit,
+		IPLimit:       DefaultIPBucketLimit,
+	}
+
 	return &API{
 		StorageSet: StorageSet{
 			LoginStorage:    bucket.NewStorage(),
@@ -29,6 +35,7 @@ func newTestAPI() *API {
 			BlackList: ip.NewList(),
 			WhiteList: ip.NewList(),
 		},
+		LimitsConfig: limits,
 	}
 }
 
@@ -573,6 +580,47 @@ func TestAPI_AuthNotOverflowIPBucket(t *testing.T) {
 		Ip:       string(ip),
 	})
 	assertOkResponse(t, true, response, err, fmt.Sprintf("2d auth for same ip but after 1 minute wait `%s`", ip))
+}
+
+func TestAPI_CountBuckets(t *testing.T) {
+	_, client := runTestPipe(t)
+
+	_, _ = client.Auth(context.Background(), &AuthRequest{
+		Login:    "test",
+		Password: "1234",
+		Ip:       "127.0.0.1",
+	})
+
+	_, _ = client.Auth(context.Background(), &AuthRequest{
+		Login:    "test2",
+		Password: "1234",
+		Ip:       "127.0.0.1",
+	})
+
+	_, _ = client.Auth(context.Background(), &AuthRequest{
+		Login:    "test3",
+		Password: "1111",
+		Ip:       "127.0.0.1",
+	})
+
+	countResponse, err := client.CountBuckets(context.Background(), &None{})
+	assertNotErrorResult(t, err, "count buckets")
+
+	expectedLoginCount := uint32(3)    //nolint:gomnd
+	expectedPasswordCount := uint32(2) //nolint:gomnd
+	expectedIPCount := uint32(1)       //nolint:gomnd
+
+	if countResponse.Login != expectedLoginCount {
+		t.Errorf("unexpected login buckets count %d instead of %d", countResponse.Login, expectedLoginCount)
+	}
+
+	if countResponse.Password != expectedPasswordCount {
+		t.Errorf("unexpected password buckets count %d instead of %d", countResponse.Password, expectedPasswordCount)
+	}
+
+	if countResponse.Ip != expectedIPCount {
+		t.Errorf("unexpected ip buckets count %d instead of %d", countResponse.Ip, expectedIPCount)
+	}
 }
 
 func assertNotErrorResult(t *testing.T, err error, prefix string) {

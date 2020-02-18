@@ -23,9 +23,10 @@ services:
     build:
       context: ../..
       dockerfile: ./build/package/Dockerfile
-    command: ./antibrutefroce --config ./configs/config.yaml grpc
+    command: ./antibrutefroce --config /root/configs/config.yml grpc
     volumes: 
       - ../../configs:/root/configs
+      - /tmp/antibruteforce:/tmp/antibruteforce
     ports:
       - 50051
     environment:
@@ -36,12 +37,10 @@ services:
       - DB_PASSWORD=1234
       - DB_CONNECT_RETRIES=20
 
-
   tests:
     build:
       context: ../..
       dockerfile: ./build/package/Dockerfile-tests
-    # command: ./tests --config ./configs/config.yml --features-path ./features/
     environment:
       - GRPC_SERVER_HOST=grpc
       - GRPC_SERVER_PORT=50051

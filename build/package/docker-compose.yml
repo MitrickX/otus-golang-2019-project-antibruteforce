@@ -23,9 +23,10 @@ services:
     build:
       context: ../..
       dockerfile: ./build/package/Dockerfile
-    command: ./antibrutefroce --config ./configs/config.yaml grpc
+    command: ./antibrutefroce --config /root/configs/config.yml grpc
     volumes: 
       - ../../configs:/root/configs
+      - /tmp/antibruteforce:/tmp/antibruteforce
     ports:
       - 50051:50051
     environment:

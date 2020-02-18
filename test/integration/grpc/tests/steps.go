@@ -22,8 +22,9 @@ const (
 )
 
 type featureTest struct {
-	responseErrors []error
-	okResponses    []*grpc.OkResponse
+	responseErrors           []error
+	okResponses              []*grpc.OkResponse
+	isAllBucketStoragesClean bool
 }
 
 func newFeatureTest() *featureTest {
@@ -287,6 +288,53 @@ func (t *featureTest) waitMinute(n int) error {
 	return nil
 }
 
+func (t *featureTest) waitUnitAllBucketStoragesEmptyOrMinutes(n int) error {
+	var ctx context.Context
+
+	var cancel context.CancelFunc
+
+	defer func() {
+		if cancel != nil {
+			cancel()
+		}
+	}()
+
+	cfg := GetConfig()
+
+	waitTimeout := 30 * time.Second // nolint:gomnd
+	maxDuration := time.Duration(n) * time.Minute
+	totalDurationPassed := time.Duration(0)
+
+	for totalDurationPassed < maxDuration {
+		ctx, cancel = context.WithTimeout(context.Background(), cfg.timeout)
+
+		countResponse, err := cfg.apiClient.CountBuckets(ctx, &grpc.None{})
+
+		cancel()
+
+		if err != nil {
+			return fmt.Errorf("unexpected error while counting buckets %s", err)
+		}
+
+		if countResponse.Login == 0 && countResponse.Password == 0 && countResponse.Ip == 0 {
+			t.isAllBucketStoragesClean = true
+			break
+		}
+
+		time.Sleep(waitTimeout)
+	}
+
+	return nil
+}
+
+func (t *featureTest) theAllBucketStoragesAreEmpty() error {
+	if !t.isAllBucketStoragesClean {
+		return fmt.Errorf("all bucket storages are not empty")
+	}
+
+	return nil
+}
+
 // FeatureContext for godog Suite of tests
 func FeatureContext(s *godog.Suite, t *featureTest) {
 	s.Step(`^Clean bucket for$`, t.cleanBucketFor)
@@ -298,4 +346,6 @@ func FeatureContext(s *godog.Suite, t *featureTest) {
 	s.Step(`^bucket for$`, t.bucketFor)
 	s.Step(`^The result must be "([^"]*)"$`, t.theResultMustBe)
 	s.Step(`^Wait (\d+) minute$`, t.waitMinute)
+	s.Step(`^Wait unit all bucket storages empty or (\d+) minutes$`, t.waitUnitAllBucketStoragesEmptyOrMinutes)
+	s.Step(`^The all bucket storages are empty$`, t.theAllBucketStoragesAreEmpty)
 }

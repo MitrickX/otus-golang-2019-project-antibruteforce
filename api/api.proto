@@ -26,6 +26,12 @@ message OkResponse {
     bool ok = 1;
 }
 
+message BucketCountsResponse {
+    uint32 login = 1;
+    uint32 password = 2;
+    uint32 ip = 3;
+}
+
 service Api {
     rpc AddInBlackList (IPRequest)      returns (None) {};
     rpc AddInWhiteList (IPRequest)      returns (None) {};
@@ -37,4 +43,7 @@ service Api {
     // For integration tests when need clean lists before run tests
     rpc ClearBlackList(None)                returns (None) {};
     rpc ClearWhiteList(None)                returns (None) {};
+
+    // For integration tests get all counts of all type of buckets
+    rpc CountBuckets(None)               returns (BucketCountsResponse) {};
 }
