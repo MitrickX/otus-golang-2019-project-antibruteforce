@@ -395,6 +395,7 @@ func (a *API) runBucketStorageCleaner(ctx context.Context) {
 				a.logDebugF("API.StorageCleaner: %d/%d/%d", loginBucketsCount, passwordBucketsCount, ipBucketsCount)
 
 			case <-ctx.Done():
+				ticker.Stop()
 				break OUTER
 			}
 		}
