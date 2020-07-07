@@ -4,7 +4,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/MitrickX/otus-golang-2019-project-antibruteforce)](https://goreportcard.com/report/github.com/MitrickX/otus-golang-2019-project-antibruteforce)
 
-Specification https://github.com/OtusTeam/Go/blob/master/projects/anti-bruteforce.md <br>
+Specification https://github.com/OtusGolang/final_project/blob/master/01-anti-bruteforce.md <br>
 
 <h2>Algorithm</h2>
 For this anti brute force service Token bucket algorithm (https://en.wikipedia.org/wiki/Token_bucket) is used
